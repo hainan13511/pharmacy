@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="pharmacy.web.store.dao.DrugWithdrawingMapper">
+	<!-- 获取数据 -->
+	<select id="initDrugWithdrawingInf" resultMap="drugWithdrawingInfMap"> 
+		SELECT C.*,
+		A.HOUSEID,
+		A.DWDID,
+		A.HOUSE_COUNT,
+		D.UNIT,
+		ROWNUM RN
+		FROM T_HOUSE_INVENTORY A
+		INNER JOIN T_DRUGS_WAREHOUSE_DETAILED B 
+		ON A.DWDID = B.DWDID 
+		INNER JOIN T_DRUG C 
+		ON B.DRUGID = C.DRUGID 
+		INNER JOIN T_DRUGS_WAREHOUSE_DETAILED D
+		ON A.DWDID = D.DWDID
+		AND A.HOUSE_COUNT > 0  
+		<if test="drugname != null and drugname != '' ">
+			AND C.DRUG_NAME LIKE CONCAT(CONCAT('%',#{drugname}),'%') 
+		</if>
+		<if test="batch != null and batch != '' ">
+			AND D.DWDID = #{batch}
+		</if>
+	</select>
+	
+	<!-- 获取页码 -->
+	<select id="initDrugWithdrawingInfPageNum" resultType="int">
+		SELECT COUNT(*) COUNT
+		FROM T_HOUSE_INVENTORY A
+		INNER JOIN T_DRUGS_WAREHOUSE_DETAILED B 
+		ON A.DWDID = B.DWDID 
+		INNER JOIN T_DRUG C 
+		ON B.DRUGID = C.DRUGID 
+		INNER JOIN T_DRUGS_WAREHOUSE_DETAILED D
+		ON A.DWDID = D.DWDID
+		AND A.HOUSE_COUNT > 0 
+		<if test="drugname != null and drugname != '' ">
+			AND C.DRUG_NAME LIKE CONCAT(CONCAT('%',#{drugname}),'%') 
+		</if>
+		<if test="batch != null and batch != '' ">
+			AND D.DWDID = #{batch}
+		</if>
+	</select>
+	
+	<!-- 查询药品库存 -->
+	<select id="getHousecount" resultType="int">
+		SELECT HOUSE_COUNT FROM T_HOUSE_INVENTORY WHERE HOUSEID = #{houseid}
+	</select>
+	
+	<!-- 减少药房库存 -->	
+	<update id="updateHouseInventory">
+		UPDATE T_HOUSE_INVENTORY SET HOUSE_COUNT = HOUSE_COUNT - #{count} WHERE HOUSEID = #{houseid}
+	</update>
+
+	<!-- 添加药库库存 -->
+	<update id="updateInventorycount">
+		UPDATE T_PHARMACY_INVENTORY SET INVENTORY_COUNT = INVENTORY_COUNT + #{count} WHERE INVENTORYID = #{inventoryid}
+	</update>
+
+	<!-- 查询药库是否存在这批药 -->
+	<select id="getInventoryid" resultType="java.lang.Integer">
+		SELECT INVENTORYID FROM T_PHARMACY_INVENTORY WHERE DWDID = #{dwdid}
+	</select>
+
+	
+	<!-- 如果不存在插入药库库存 -->
+	<insert id="">
+		INSERT INTO T_PHARMACY_INVENTORY
+		  (INVENTORYID, DRUGID, INVENTORY_COUNT, DWDID)
+		VALUES
+		  (SEQ_PHARMACY_INVENTORY.NEXTVAL, #{drugid}, #{count}, #{dwdid});
+	</insert>
+
+
+	<!-- 映射 -->
+	<resultMap type="pharmacy.web.store.model.dto.DrugWithdrawingInfDto" id="drugWithdrawingInfMap">
+		<result column="DRUGID" property="drugId" />
+		<result column="DRUG_NAME" property="drugName" />
+		<result column="CHEMICAL_NAME" property="chemicalName" />
+		<result column="COMMONLY_NAME" property="commonlyName" />
+		<result column="SPECIFICATION" property="specification" />
+		<result column="DOSAGE" property="dosage" />
+		<result column="FORMULA" property="formula" />
+		<result column="METHOD_USERS" property="methodUsers" />
+		<result column="MARKUP" property="markup" />
+		<result column="SPELL" property="spell" />
+		<result column="FIVE_STROKE" property="fiveStroke" />
+		<result column="INVOICE_NAME" property="invoiceName" />
+		<result column="ANTIBIOTICS" property="antibiotics" />
+		<result column="DOSE" property="dose" />
+		<result column="NUMBER_DAYS" property="numberDays" />
+		<result column="DCOST" property="dcost" />
+		<result column="DSALE" property="dsale" />
+		<result column="HOUSE_COUNT" property="houseCount" />
+	</resultMap>
+</mapper>

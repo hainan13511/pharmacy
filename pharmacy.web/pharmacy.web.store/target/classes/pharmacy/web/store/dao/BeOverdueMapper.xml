@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="pharmacy.web.store.dao.BeOverdueMapper">
+
+	<select id="beOverdueTable" resultMap="beOverdue">
+		SELECT A.DWDID,A.HOUSE_COUNT,C.DRUG_NAME,B.EFFECTIVE_DATE FROM T_HOUSE_INVENTORY A JOIN T_DRUGS_WAREHOUSE_DETAILED B ON A.DWDID = B.DWDID JOIN T_DRUG C ON A.DRUGID = C.DRUGID   WHERE B.EFFECTIVE_DATE &lt; TRUNC(SYSDATE) AND HOUSE_COUNT >0
+		<if test="dname != null and dname != '' ">
+				AND DRUG_NAME LIKE CONCAT(CONCAT('%',#{dname}),'%')
+		</if>
+	</select>
+	<select id="beOverdueTableCount" resultType="int">
+		SELECT COUNT(*) FROM T_HOUSE_INVENTORY A JOIN T_DRUGS_WAREHOUSE_DETAILED B ON A.DWDID = B.DWDID JOIN T_DRUG C ON A.DRUGID = C.DRUGID   WHERE B.EFFECTIVE_DATE &lt; TRUNC(SYSDATE) AND HOUSE_COUNT >0
+		<if test="dname != null and dname != '' ">
+				AND DRUG_NAME LIKE CONCAT(CONCAT('%',#{dname}),'%')
+		</if>
+	</select>
+	<select id="drugId" resultType="int">
+		SELECT DRUGID FROM T_DRUG  WHERE DRUG_NAME = #{dname}
+	</select>
+	<select id="beOverdue" resultMap="beOverdue">
+		SELECT * FROM T_HOUSE_INVENTORY A JOIN T_DRUGS_WAREHOUSE_DETAILED B ON A.DWDID = B.DWDID JOIN T_DRUG C ON A.DRUGID = C.DRUGID   WHERE B.EFFECTIVE_DATE &lt; TRUNC(SYSDATE) AND HOUSE_COUNT >0
+	</select>
+	<resultMap type="pharmacy.web.store.model.dto.BeOverdue" id="beOverdue">
+		<result column="DWDID" property="did"/>
+		<result column="DRUG_NAME" property="dname"/>
+		<result column="EFFECTIVE_DATE" property="dtime"/>
+		<result column="HOUSE_COUNT" property="number"/>
+	</resultMap>
+</mapper>

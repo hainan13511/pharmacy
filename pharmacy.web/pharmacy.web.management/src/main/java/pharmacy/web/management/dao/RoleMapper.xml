@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="pharmacy.web.management.dao.RoleMapper">
+
+	<!-- 查询角色初始化 -->
+	<select id="initRole" resultType="pharmacy.common.model.Role">
+		SELECT *FROM T_ROLE
+		<where>
+			<if test="rolename!=null and rolename!=''">
+				ROLENAME like CONCAT(CONCAT('%',#{rolename}),'%')
+			</if>
+			AND 1=1 ORDER BY ROLEID
+		</where>
+	</select>
+	<!-- 查询角色总数据 -->
+	<select id="count" resultType="int">
+		SELECT COUNT(*) FROM T_ROLE
+		<where>
+			<if test="rolename!=null and rolename!=''">
+				ROLENAME like CONCAT(CONCAT('%',#{rolename}),'%')
+			</if>
+		</where>
+	</select>
+	<!-- 删除角色 -->
+	<delete id="RoleDel">
+		DELETE FROM T_ROLE WHERE ROLEID=#{id}
+	</delete>
+	<!-- 查询所有权限 -->
+	<select id="RoleLimit" resultMap="MenuDtoResultMap">
+		SELECT DISTINCT A.*,B.*,C.SPARAM FROM T_MENU A
+		JOIN T_LIMIT B ON A.MENUID=B.MENUID
+		JOIN T_STATE C ON C.SVALUE=A.PID AND C.STYPE='菜单'
+		ORDER BY B.LIMITID
+	</select>
+
+	<!-- 查询对应用户的权限 -->
+	<select id="RolePossess" resultMap="MenuDtoResultMap">
+		SELECT DISTINCT T1.*,T4.*,T5.SPARAM FROM T_RLRELATION T2
+		JOIN T_LIMIT T1 ON T1.LIMITID=T2.LIMITID
+		JOIN T_ROLE T3 ON T3.ROLEID=T2.ROLEID
+		JOIN T_MENU T4 ON T4.MENUID= T1.MENUID
+		JOIN T_STATE T5 ON T5.SVALUE=T4.PID AND T5.STYPE='菜单'
+		AND T3.ROLEID=#{id} ORDER BY T1.LIMITID
+	</select>
+	<!-- 查询所有角色的信息 -->
+	<select id="RoleList" resultType="pharmacy.common.model.Role">
+		SELECT *FROM T_ROLE
+	</select>
+	<!-- 添加角色信息 -->
+	<insert id="addRole" parameterType="pharmacy.common.model.Role">
+		<selectKey order="BEFORE" resultType="String" keyProperty="roleid">
+			SELECT SEQ_T_ROLE.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO T_ROLE(ROLEID,ROLENAME)VALUES(#{roleid},#{rolename})
+	</insert>
+	<!-- 添加角色权限表的信息 -->
+	<insert id="addLimit">
+		INSERT INTO T_RLRELATION(RLID,ROLEID,LIMITID)VALUES(SEQ_T_RLRELATION.NEXTVAL,#{rid},#{lid})
+	</insert>
+	<!-- 删除对应的权限的所有的信息 -->
+	<delete id="DelLimit">
+		DELETE FROM T_RLRELATION WHERE ROLEID=#{rid}
+	</delete>
+
+	<!-- menuDto类的映射 -->
+	<resultMap type="pharmacy.web.management.model.dto.MenuDto" id="MenuDtoResultMap">
+		<result column="MENUID" property="menuid" />
+		<result column="MENUNAME" property="menuname" />
+		<result column="ICON" property="icon" />
+		<result column="PID" property="pid" />
+		<collection ofType="pharmacy.common.model.Limit" property="secondMenu">
+			<result column="LIMITID" property="limitid" />
+			<result column="LIMITNAME" property="limitname" />
+			<result column="URL" property="url" />
+			<result column="MENUID" property="menuid" />
+		</collection>
+	</resultMap>
+</mapper>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="pharmacy.web.warehouse.dao.DrugTypeMapper">
+	<!--药品大类下拉框  -->
+	<select id="drugTypeFrist" resultType="string">
+		SELECT DTNAME FROM T_DRUGTYPE WHERE FID=0	
+	</select>
+	<!--文档小类下拉框  -->
+	<select id="drugTypeSecond" resultType="pharmacy.web.warehouse.model.dto.DrugType">
+		SELECT B.DTID,B.DTNAME,B.FID FROM T_DRUGTYPE A INNER JOIN T_DRUGTYPE B ON
+		A.DTID=B.FID WHERE A.DTNAME=#{drugfrist}
+	</select>
+	<!--药品类型展示初始化  -->
+	<select id="drugTypeInit" resultType="pharmacy.web.warehouse.model.dto.DrugType">
+			SELECT DTID,DTNAME FROM T_DRUGTYPE WHERE FID=0
+			<if test="dtname!=null and dtname!=''">
+				AND DTNAME LIKE CONCAT(CONCAT('%',#{dtname}),'%')	
+			</if>		
+	</select>
+	<!--药品类型列表分页    -->
+	<select id="countDrugType" resultType="integer">
+			SELECT COUNT(*) C FROM T_DRUGTYPE WHERE FID=0
+			<if test="dtname!=null and dtname!=''">
+				AND A.DTNAME LIKE CONCAT(CONCAT('%',#{dtname}),'%')	
+			</if>						
+	</select>
+	<!-- 新增药品类型   -->
+	<insert id="addType">
+		INSERT INTO T_DRUGTYPE(DTID,DTNAME,FID)VALUES(SEQ_T_DRUGTYPE.NEXTVAL,
+		#{tname},(SELECT DTID FROM T_DRUGTYPE WHERE DTNAME=#{fname}))
+	</insert>
+	<!-- 删除药品类型   -->
+	<delete id="delType">
+		DELETE FROM T_DRUGTYPE WHERE DTID=#{dtid}
+	</delete>
+	<!-- 修改药品类型   -->
+	<update id="alterType">
+		UPDATE T_DRUGTYPE SET DTNAME=#{newtype} WHERE DTID=#{dtid}
+	</update>
+	<!-- 新增药品大类   -->
+	<insert id="addBig">
+		INSERT INTO T_DRUGTYPE(DTID,DTNAME,FID)VALUES
+		(SEQ_T_DRUGTYPE.NEXTVAL,#{bigtype},0)
+	</insert>
+	<!--药品大类下拉框  -->
+	<select id="judgeBigType" resultType="string">
+		SELECT DTNAME FROM T_DRUGTYPE WHERE DTNAME=#{bigtype}	
+	</select>
+	<!--删除药品大类  -->
+	<delete id="delBig">
+		DELETE FROM T_DRUGTYPE WHERE DTNAME=#{bigtype}
+	</delete>
+	<!--删除药品大类所属的小类  -->
+	<delete id="delSmall">
+		DELETE FROM T_DRUGTYPE WHERE FID=
+		(SELECT DTID FROM T_DRUGTYPE WHERE DTNAME=#{bigtype})
+	</delete>
+	<!--修改药品大类  -->
+	<update id="alterBig">
+		UPDATE T_DRUGTYPE SET DTNAME=#{newbigtype} WHERE DTNAME=#{oldbigtype}
+	</update>
+	
+	
+	
+	
+	
+</mapper>

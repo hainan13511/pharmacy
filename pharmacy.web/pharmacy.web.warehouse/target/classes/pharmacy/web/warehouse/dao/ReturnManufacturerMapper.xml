@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="pharmacy.web.warehouse.dao.ReturnManufacturerMapper">
+	
+	<!-- 查询数据 -->
+	<select id="initReturnManufacturer" resultMap="returnManufacturerInfMap">
+		SELECT 
+		C.*,
+		A.INVENTORYID,
+		A.INVENTORY_COUNT,
+		B.PURCHASING_TIME,
+		B.PROVIDER,
+		B.UNIT ,
+		D.UNAME
+		FROM T_PHARMACY_INVENTORY A
+		INNER JOIN T_DRUGS_WAREHOUSE_DETAILED B 
+		ON A.DWDID = B.DWDID 
+		INNER JOIN T_DRUG C 
+		ON B.DRUGID = C.DRUGID 
+		INNER JOIN T_USER D
+		ON B.U_ID = D.U_ID
+		AND A.INVENTORY_COUNT > 0 
+		<if test="drugname != null and drugname != '' ">
+			AND C.DRUG_NAME LIKE CONCAT(CONCAT('%',#{drugname}),'%') 
+		</if>
+		<if test="supply != null and supply != '' ">
+			AND B.PROVIDER LIKE CONCAT(CONCAT('%',#{supply}),'%')
+		</if>
+		<if test="uname != null and uname != '' ">
+			AND D.UNAME LIKE CONCAT(CONCAT('%',#{uname}),'%')
+			
+		</if>
+		ORDER BY PURCHASING_TIME DESC
+	</select>
+	
+	<!-- 查询页码 -->
+	<select id="initReturnManufacturerPageNum" resultType="int">
+		SELECT COUNT(*) COUNT
+		FROM T_PHARMACY_INVENTORY A
+		INNER JOIN T_DRUGS_WAREHOUSE_DETAILED B 
+		ON A.DWDID = B.DWDID 
+		INNER JOIN T_DRUG C 
+		ON B.DRUGID = C.DRUGID 
+		INNER JOIN T_USER D
+		ON B.U_ID = D.U_ID
+		AND A.INVENTORY_COUNT > 0
+		<if test="drugname != null and drugname != '' ">
+			AND C.DRUG_NAME LIKE CONCAT(CONCAT('%',#{drugname}),'%')
+		</if>
+		<if test="supply != null and supply != '' ">
+			AND B.PROVIDER LIKE CONCAT(CONCAT('%',#{supply}),'%')
+			
+		</if>
+		<if test="uname != null and uname != '' ">
+			AND D.UNAME LIKE CONCAT(CONCAT('%',#{uname}),'%')
+		</if>
+		ORDER BY PURCHASING_TIME DESC
+	</select>
+	
+	<!-- 查询库存 --> 
+	<select id="getInventoryCount" resultType="int"> 
+		SELECT INVENTORY_COUNT FROM T_PHARMACY_INVENTORY WHERE INVENTORYID = #{inventoryid}
+	</select>
+	
+	<!-- 出库减少库存 -->
+	<update id="reduceInventories">
+		UPDATE T_PHARMACY_INVENTORY SET  INVENTORY_COUNT = INVENTORY_COUNT - #{drug_count} WHERE  INVENTORYID = #{inventoryid}
+	</update> 
+	
+	<!-- 关系映射 -->
+	<resultMap type="pharmacy.web.warehouse.model.dto.ReturnManufacturerInfDto" id="returnManufacturerInfMap">
+		<result column="DRUGID" property="drugId" />
+		<result column="DRUG_NAME" property="drugName" />
+		<result column="CHEMICAL_NAME" property="chemicalName" />
+		<result column="COMMONLY_NAME" property="commonlyName" />
+		<result column="SPECIFICATION" property="specification" />
+		<result column="DOSAGE" property="dosage" />
+		<result column="FORMULA" property="formula" />
+		<result column="METHOD_USERS" property="methodUsers" />
+		<result column="MARKUP" property="markup" />
+		<result column="SPELL" property="spell" />
+		<result column="FIVE_STROKE" property="fiveStroke" />
+		<result column="INVOICE_NAME" property="invoiceName" />
+		<result column="ANTIBIOTICS" property="antibiotics" />
+		<result column="DOSE" property="dose" />
+		<result column="NUMBER_DAYS" property="numberDays" />
+		<result column="DCOST" property="dcost" />
+		<result column="DSALE" property="dsale" />
+		<result column="INVENTORY_COUNT" property="inventoryCount" />
+		<result column="PURCHASING_TIME" property="purchasingTime" />
+	</resultMap>
+</mapper>

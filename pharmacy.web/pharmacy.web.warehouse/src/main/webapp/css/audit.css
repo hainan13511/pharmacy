@@ -1,0 +1,35 @@
+html,body{
+	margin: 0;/* 外边距全部清零 */
+}
+.div_external{
+	padding: 5px;
+}
+.panel-body .panel-add> *{
+	float: left;
+	margin: 0 5px 20px 10px ;
+}
+.panel-body .panel-search > *{
+	float: left;
+	margin: 1px 10px 20px 10px ;
+	width: 320px;
+}
+.alter-role{
+	position: absolute; 
+	width: 300px;
+	margin: -180px auto 0 400px;
+	z-index:999;
+	display:none;
+}
+.alter-role .panel-body > *{
+	margin: 20px 0;
+}
+/* .limit-list{
+	width: 270px;
+	margin-top: 10px;
+} */
+.add-role .panel-body > *{
+	margin: 20px 0;
+}
+.drug-list1 >*{
+	margin: 10px auto 10px auto;
+}

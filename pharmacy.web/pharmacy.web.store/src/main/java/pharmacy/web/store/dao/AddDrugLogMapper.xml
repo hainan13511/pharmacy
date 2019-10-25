@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="pharmacy.web.store.dao.AddDrugLogMapper">
+
+	<!-- 添加日志 -->
+	<insert id="addDrugLog">
+		INSERT INTO
+		DRUG_LOG(LOG_ID,LOG_CONTENT,U_ID,LOG_DATE)
+		VALUES(SEQ_DRUG_LOG.NEXTVAL,#{content},#{uid},SYSDATE)
+	</insert>
+</mapper>

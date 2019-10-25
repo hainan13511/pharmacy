@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="pharmacy.web.store.dao.ProfitMapper">
+	<!-- 查询药品报损表的信息 -->
+	<select id="profitList" resultMap="DrugSalesDtoResultMap">
+		SELECT T.*,ROWNUM RN FROM (
+		SELECT B.DRUG_NAME, SUM(SALES_COUNT) SALES_COUNT,SUM(SALES_COST_PRICE) SALES_COST_PRICE,SUM(SALES_SELL_PRICE ) SALES_SELL_PRICE FROM T_DRUG_SALES A
+		INNER JOIN T_DRUG B 
+		ON A.DRUGID = B.DRUGID
+		<where>
+			<if test="startTime!=null and startTime!=''">
+				AND TO_CHAR(SALES_DATE,'YYYY-MM-DD') &gt;= #{startTime}
+			</if>
+			<if test="endTime!=null and endTime!=''">
+				AND TO_CHAR(SALES_DATE,'YYYY-MM-DD')  &lt;= #{endTime}
+			</if>
+		</where>
+		GROUP BY B.DRUGID ,B.DRUG_NAME
+		) T
+	</select>
+	<!-- 查询药品调价前后价格 -->
+	<select id="profitCount" resultType="int">
+		SELECT COUNT(*) COUNT FROM (
+		SELECT B.DRUG_NAME, SUM(SALES_COUNT) SALES_COUNT,SUM(SALES_COST_PRICE) SALES_COST_PRICE,SUM(SALES_SELL_PRICE ) SALES_SELL_PRICE FROM T_DRUG_SALES A
+		INNER JOIN T_DRUG B 
+		ON A.DRUGID = B.DRUGID
+		<where>
+			<if test="startTime!=null and startTime!=''">
+				AND TO_CHAR(SALES_DATE,'YYYY-MM-DD') &gt;=#{startTime}
+			</if>
+			<if test="endTime!=null and endTime!=''">
+				AND TO_CHAR(SALES_DATE,'YYYY-MM-DD')  &lt;=#{endTime}
+			</if>
+		</where>
+		GROUP BY B.DRUGID ,B.DRUG_NAME
+		) T
+	</select>
+
+	<!-- 映射 -->
+	<resultMap type="pharmacy.web.store.model.dto.DrugSalesDto" id="DrugSalesDtoResultMap">
+		<result column="DRUG_NAME" property="drugName" />
+		<result column="SALES_ID" property="salesId" />
+		<result column="DRUGID" property="drugId" />
+		<result column="SALES_COUNT" property="salesCount" />
+		<result column="SALES_COST_PRICE" property="salesCostPrice" />
+		<result column="SALES_SELL_PRICE" property="salesSellPrice" />
+		<result column="SALES_DATE" property="salesDate" />
+		<result column="U_ID" property="uId" />
+	</resultMap>
+</mapper>

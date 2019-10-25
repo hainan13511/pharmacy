@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="pharmacy.web.store.dao.DrugBreakageOperationMapper">
+
+	<!-- 查询药品表与药房药库库存 -->
+	<select id="listDrugBreakageOperationDto" resultMap="getDrugBreakageOperationDtoRM">
+		SELECT DR.*,DT.DTNAME,HO.HOUSE_COUNT H_SUM,PH.INVENTORY_COUNT P_SUM,PH.DWDID FROM T_DRUG DR
+		INNER JOIN T_DRUGTYPE DT ON
+		DR.DTID = DT.DTID
+		LEFT JOIN T_HOUSE_INVENTORY HO ON DR.DRUGID = HO.DRUGID
+		INNER JOIN T_PHARMACY_INVENTORY PH ON
+		DR.DRUGID = PH.DRUGID AND HO.DWDID = PH.DWDID
+		LEFT JOIN T_DRUGS_WAREHOUSE_DETAILED DW ON PH.DWDID = DW.DWDID
+		<where>
+			<if test="drugName != null and drugName != ''">
+				AND DR.DRUG_NAME LIKE CONCAT(CONCAT('%',#{drugName}),'%')
+			</if>
+		</where>
+	</select>
+	<resultMap type="pharmacy.web.store.model.dto.DrugBreakageOperationDto" id="getDrugBreakageOperationDtoRM">
+		<result column="DRUGID" property="drugId" />
+		<result column="DRUG_NAME" property="drugName" />
+		<result column="CHEMICAL_NAME" property="chemicalName" />
+		<result column="COMMONLY_NAME" property="commonlyName" />
+		<result column="SPECIFICATION" property="specification" />
+		<result column="DOSAGE" property="dosage" />
+		<result column="FORMULA" property="formula" />
+		<result column="METHOD_USERS" property="methodUsers" />
+		<result column="MARKUP" property="markup" />
+		<result column="SPELL" property="spell" />
+		<result column="FIVE_STROKE" property="fiveStroke" />
+		<result column="INVOICE_NAME" property="invoiceName" />
+		<result column="ANTIBIOTICS" property="antibiotics" />
+		<result column="DOSE" property="dose" />
+		<result column="NUMBER_DAYS" property="numberDays" />
+		<result column="DTID" property="dtId" />
+		<result column="DTNAME" property="drugTypeName" />
+		<result column="H_SUM" property="hSum" />
+		<result column="P_SUM" property="pSum" />
+		<result column="DWDID" property="dwdId" />
+		<result column="DSTATE" property="dState" />
+		<result column="DCOST" property="dcost" />
+		<result column="DSALE" property="dsale" />
+	</resultMap>
+	<!-- 查询药品表总数 -->
+	<select id="countDrugBreakageOperationDto" resultType="java.lang.Integer">
+		SELECT COUNT(DR.DRUGID) C FROM T_DRUG DR
+        INNER JOIN T_DRUGTYPE DT ON
+        DR.DTID = DT.DTID
+        LEFT JOIN T_HOUSE_INVENTORY HO ON DR.DRUGID = HO.DRUGID
+        INNER JOIN T_PHARMACY_INVENTORY PH ON
+        DR.DRUGID = PH.DRUGID AND HO.DWDID = PH.DWDID
+        LEFT JOIN T_DRUGS_WAREHOUSE_DETAILED DW ON PH.DWDID = DW.DWDID
+		<where>
+			<if test="drugName != null and drugName != ''">
+				AND DR.DRUG_NAME LIKE CONCAT(CONCAT('%',#{drugName}),'%')
+			</if>
+		</where>
+	</select>
+	<!-- 药品报损 -->
+	<update id="drugBreakage">
+		UPDATE T_HOUSE_INVENTORY
+		SET HOUSE_COUNT = (SELECT HOUSE_COUNT FROM T_HOUSE_INVENTORY WHERE DWDID =
+		#{batch} AND DRUGID = #{drugId}) - #{num}
+		WHERE DWDID = #{batch} AND DRUGID = #{drugId} AND HOUSE_COUNT &gt;= #{num}
+	</update>
+	<!-- 药品报损记录 -->
+	<insert id="insertDrugBreakageLog">
+		INSERT INTO DRUG_BREAKAGE
+		(BREAKAGE_ID, BREAKAGE_CONTENT, U_ID, BREAKAGE_DATE, BREAKAGE_COUNT,
+		DRUG_ID)
+		VALUES
+		(SEQ_DRUG_BREAKAGE.NEXTVAL, #{cause}, #{userId}, SYSDATE, #{num},#{drugId})
+	</insert>
+	<!-- 计入销售成本 -->
+	<insert id="insertDrugSales">
+		INSERT INTO T_DRUG_SALES
+		(SALES_ID, DRUGID, SALES_COUNT, SALES_COST_PRICE, SALES_SELL_PRICE, SALES_DATE, U_ID)
+		VALUES
+		(SEQ_T_DRUG_SALES.NEXTVAL, #{drugId}, #{num},
+		(SELECT T_DRUG.DCOST FROM T_DRUG WHERE DRUGID = #{drugId})*#{num},0,SYSDATE, #{userId})
+	</insert>
+</mapper>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="pharmacy.web.warehouse.dao.AuditMapper">
+	<select id="initAudit" resultMap="auditInfDtoMap">
+		SELECT A.*,
+		B.DRUGID,
+		C.UNAME
+		FROM DRUG_APPLY A
+		LEFT JOIN T_DRUG B
+		ON A.DRUG_NAME = B.DRUG_NAME
+		LEFT JOIN T_USER C
+		ON A.USER_ID = C.U_ID 
+		<where>
+			<if test="uname != null and uname != '' ">
+				AND C.UNAME LIKE  CONCAT(CONCAT('%',#{uname}),'%')
+			</if>
+			<if test="drugname != null and drugname != '' ">
+				AND A.DRUG_NAME LIKE  CONCAT(CONCAT('%',#{drugname}),'%')
+			</if>
+			<if test="state != null and state != '' ">
+				AND A.CHECK_STATE = #{state}
+			</if>
+		</where>
+		
+		ORDER BY A.CHECK_STATE ,A.APPLY_TIME DESC
+		
+	</select>
+	
+	<select id="initAuditPageNum" resultType="int">
+		SELECT COUNT(*) COUNT FROM DRUG_APPLY A
+		LEFT JOIN T_DRUG B
+		ON A.DRUG_NAME = B.DRUG_NAME
+		LEFT JOIN T_USER C
+		ON A.USER_ID = C.U_ID
+		<where>
+			<if test="uname != null and uname != '' ">
+				AND C.UNAME LIKE  CONCAT(CONCAT('%',#{uname}),'%')
+			</if>
+			<if test="drugname != null and drugname != '' ">
+				AND A.DRUG_NAME LIKE  CONCAT(CONCAT('%',#{drugname}),'%')
+			</if>
+			<if test="state != null and state != '' ">
+				AND A.CHECK_STATE = #{state}
+			</if>
+		</where>
+	</select>
+	
+	
+	<!-- 审核 -->
+	<update id="audit">
+		UPDATE DRUG_APPLY SET CHECK_STATE = #{state} WHERE APPLY_ID = #{id}
+	</update>
+	
+	
+	
+	<!-- 获取药品数量 -->
+	<select id="getDrugCount" resultType="java.lang.Integer">
+		SELECT SUM(INVENTORY_COUNT) INVENTORY_COUNT FROM T_PHARMACY_INVENTORY WHERE DRUGID = #{drugId}
+	</select>
+	
+	<!-- 获取各批次的药品 按购买先后顺序排列  -->
+	<select id="getPharmacyInventory" resultMap="pharmacyInventoryMap">
+		SELECT A.* FROM T_PHARMACY_INVENTORY A
+		INNER JOIN T_DRUGS_WAREHOUSE_DETAILED B 
+		ON A.DWDID = B.DWDID
+		WHERE A.DRUGID = #{drugId} AND A.INVENTORY_COUNT > 0 ORDER BY PURCHASING_TIME 
+	</select>
+	
+	<!-- 查询药库是否存在该药品 -->
+	<select id="selectHouseid" resultType="java.lang.Integer" >
+		 SELECT * FROM T_HOUSE_INVENTORY WHERE DWDID = #{dwdid}
+	</select>
+	
+	<!-- 添加药房端库存 --> 
+	<update id="addStoreInventory">
+		UPDATE T_HOUSE_INVENTORY SET HOUSE_COUNT = HOUSE_COUNT + #{count} WHERE HOUSEID = #{houseid}
+	</update>
+	
+	<!-- 减少药库库存 -->
+	<update id="reduceInventoryCount">
+		UPDATE T_PHARMACY_INVENTORY SET INVENTORY_COUNT = INVENTORY_COUNT - #{count} WHERE INVENTORYID = #{inventoryId}
+	</update>
+	
+	<!-- 为药房添加数据  -->
+	<insert id="insertStore">
+		INSERT INTO T_HOUSE_INVENTORY
+		  (HOUSEID, DRUGID, HOUSE_COUNT, DWDID, HOUSE_DATE)
+		VALUES
+		 (SEQ_T_HOUSE_INVENTORY.NEXTVAL, #{drugId}, #{count}, #{dwdid},SYSDATE)
+	</insert>
+	
+	
+	<!-- 添加出入库明细表 -->
+	<insert id="insertOutPutWarehouse">
+		INSERT INTO T_OUT_PUT_WAREHOUSE
+			(TOR_ID, DRUGID, U_ID, TOR_TIME, OPERATION, AMOUNT)
+		VALUES
+		  (SEQ_T_OUT_PUT_WAREHOUSE.NEXTVAL, #{drugId}, #{uid}, SYSDATE,  #{operation}, #{count})
+	</insert>
+	
+	
+	<!--  
+	
+	
+	
+	 -->
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<!--  -->
+	<resultMap type="pharmacy.common.model.PharmacyInventory" id="pharmacyInventoryMap">
+		<result column="INVENTORY_COUNT" property="inventoryCount"/>
+	</resultMap>
+	
+	
+	
+	<resultMap type="pharmacy.web.warehouse.model.dto.AuditInfDto" id="auditInfDtoMap">
+ 		<result column="CHECK_STATE" property="checkState"/>
+ 		<result column="USER_ID" property="userId"/>
+		<result column="APPLY_ID" property="applyId"/>
+		<result column="DRUG_NAME" property="drugName"/>
+		<result column="APPLY_TIME" property="applyTime"/>
+		<result column="APPLY_NUM" property="applyNum"/> 
+	</resultMap>
+	
+	
+</mapper>

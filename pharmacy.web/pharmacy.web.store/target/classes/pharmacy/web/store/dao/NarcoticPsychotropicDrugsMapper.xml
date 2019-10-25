@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="pharmacy.web.store.dao.NarcoticPsychotropicDrugsMapper">
+
+    <select id="NpdsEnterWarehouseTable" resultMap="npdsEnterWarehouse">
+   		SELECT A.DRUGID,A.DRUG_NAME,B.PROVIDER,C.UNAME,A.DCOST,B.INVENTORY_COUNT,B.PURCHASING_TIME FROM T_DRUG A JOIN T_DRUGS_WAREHOUSE_DETAILED B ON A.DRUGID = B.DRUGID JOIN T_USER C ON B.U_ID = C.U_ID JOIN T_DRUGTYPE D ON A.DTID = D.DTID WHERE D.FID = 3
+    	<if test="dname != null and dname != '' ">
+			AND DRUG_NAME LIKE CONCAT(CONCAT('%',#{dname}),'%')
+		</if>
+		<if test="etime != null and etime != '' ">
+			AND TO_CHAR(PURCHASING_TIME,'YYYY-MM-DD') &gt;= #{etime}
+		</if>
+		<if test="stime != null and stime != '' ">
+			AND TO_CHAR(PURCHASING_TIME,'YYYY-MM-DD') &lt;= #{stime}
+		</if>
+    </select>
+
+	<select id="NpdsEnterWarehouseTableCount" resultType="int">
+		SELECT COUNT(*) FROM T_DRUG A JOIN T_DRUGS_WAREHOUSE_DETAILED B ON A.DRUGID = B.DRUGID JOIN T_USER C ON B.U_ID = C.U_ID JOIN T_DRUGTYPE D ON A.DTID = D.DTID WHERE D.FID = 3
+		<if test="dname != null and dname != '' ">
+			AND DRUG_NAME LIKE CONCAT(CONCAT('%',#{dname}),'%')
+		</if>
+		<if test="etime != null and etime != '' ">
+			AND TO_CHAR(PURCHASING_TIME,'YYYY-MM-DD') &gt;= #{etime}
+		</if>
+		<if test="stime != null and stime != '' ">
+			AND TO_CHAR(PURCHASING_TIME,'YYYY-MM-DD') &lt;= #{stime}
+		</if>
+	</select>
+	
+	 <select id="NpdsSalesGradeTable" resultMap="sales">
+	 	SELECT A.DRUGID,B.DRUG_NAME,D.UNAME,B.DCOST,A.SALES_COUNT,A.SALES_COST_PRICE,A.SALES_DATE FROM T_DRUG_SALES A JOIN T_DRUG B ON A.DRUGID = B.DRUGID  JOIN  T_DRUGTYPE C ON B.DTID = C.DTID JOIN T_USER D ON A.U_ID = D.U_ID  WHERE C.FID = 3 
+    	<if test="dname != null and dname != '' ">
+			AND DRUG_NAME LIKE CONCAT(CONCAT('%',#{dname}),'%')
+		</if>
+		<if test="etime != null and etime != '' ">
+			AND TO_CHAR(PURCHASING_TIME,'YYYY-MM-DD') &gt;= #{etime}
+		</if>
+		<if test="stime != null and stime != '' ">
+			AND TO_CHAR(PURCHASING_TIME,'YYYY-MM-DD') &lt;= #{stime}
+		</if>
+		 ORDER BY SALES_DATE DESC
+    </select>
+
+	<select id="NpdsSalesGradeTableCount" resultType="int">
+		SELECT COUNT(*) FROM T_DRUG_SALES A JOIN T_DRUG B ON A.DRUGID = B.DRUGID  JOIN  T_DRUGTYPE C ON B.DTID = C.DTID  WHERE C.FID = 3
+    	<if test="dname != null and dname != '' ">
+			AND DRUG_NAME LIKE CONCAT(CONCAT('%',#{dname}),'%')
+		</if>
+		<if test="etime != null and etime != '' ">
+			AND TO_CHAR(PURCHASING_TIME,'YYYY-MM-DD') &gt;= #{etime}
+		</if>
+		<if test="stime != null and stime != '' ">
+			AND TO_CHAR(PURCHASING_TIME,'YYYY-MM-DD') &lt;= #{stime}
+		</if>
+	</select>
+	
+	 <select id="NpdsStorageTable" resultMap="inventory">
+    	SELECT * FROM T_PHARMACY_INVENTORY A JOIN T_DRUG B ON A.DRUGID = B.DRUGID JOIN T_DRUGTYPE C ON B.DTID = C.DTID WHERE C.FID = 3
+    	<if test="dname != null and dname != '' ">
+			AND DRUG_NAME LIKE CONCAT(CONCAT('%',#{dname}),'%')
+		</if>
+    </select>
+
+	<select id="NpdsStorageTableCount" resultType="int">
+		SELECT COUNT(*) FROM T_PHARMACY_INVENTORY A JOIN T_DRUG B ON A.DRUGID = B.DRUGID JOIN T_DRUGTYPE C ON B.DTID = C.DTID WHERE C.FID = 3
+		<if test="dname != null and dname != '' ">
+			AND DRUG_NAME LIKE CONCAT(CONCAT('%',#{dname}),'%')
+		</if>
+	</select>
+	<resultMap type="pharmacy.web.store.model.dto.NpdsEnterWarehouse" id="sales">
+		<result column="DRUGID" property="did"/>
+		<result column="DRUG_NAME" property="dname"/>
+		<result column="UNAME" property="aname"/>
+		<result column="SALES_COST_PRICE" property="money"/>
+		<result column="SALES_COUNT" property="number"/>
+		<result column="SALES_DATE" property="dtime"/>
+	</resultMap>
+	
+	<resultMap type="pharmacy.web.store.model.dto.NpdsEnterWarehouse" id="inventory">
+		<result column="INVENTORYID" property="did"/>
+		<result column="DRUG_NAME" property="dname"/>
+		<result column="INVENTORY_COUNT" property="number"/>
+	</resultMap>
+	
+	<resultMap type="pharmacy.web.store.model.dto.NpdsEnterWarehouse" id="npdsEnterWarehouse">
+		<result column="DRUGID" property="did"/>
+		<result column="DRUG_NAME" property="dname"/>
+		<result column="PROVIDER" property="supplier"/>
+		<result column="UNAME" property="aname"/>
+		<result column="DCOST" property="money"/>
+		<result column="INVENTORY_COUNT" property="number"/>
+		<result column="PURCHASING_TIME" property="dtime"/>
+	</resultMap>
+</mapper>

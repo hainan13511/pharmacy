@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="pharmacy.web.store.dao.DailyWorkMapper">
+
+	<!-- 查询药品申请表 -->
+	<select id="listDrugApply" resultMap="getDrugApplyRM">
+		SELECT DA.*,US.UNAME FROM DRUG_APPLY DA
+		INNER JOIN T_USER US ON DA.USER_ID = US.U_ID
+		<where>
+			<if test=" dateStart != null and dateStart != ''">
+				AND DA.APPLY_TIME &gt;= to_date(#{dateStart},'YYYY-MM-DD HH24:mi:ss')
+			</if>
+			<if test=" dateEnd != null and dateEnd != ''">
+				AND DA.APPLY_TIME &lt;= to_date(#{dateEnd},'YYYY-MM-DD HH24:mi:ss')
+			</if>
+			<if test="checkState != null and checkState != -1">
+				AND DA.CHECK_STATE = #{checkState}
+			</if>
+			<if test="userId != null">
+				AND DA.USER_ID = #{userId}
+			</if>
+			<if test="drugName != null and drugName != ''">
+				AND DA.DRUG_NAME LIKE CONCAT(CONCAT('%',#{drugName}),'%')
+			</if>
+		</where>
+		ORDER BY DA.CHECK_STATE,DA.APPLY_TIME DESC
+	</select>
+	<resultMap type="pharmacy.web.store.model.dto.DrugApplyDetailDto" id="getDrugApplyRM">
+		<result column="APPLY_ID" property="applyId" />
+		<result column="DRUG_NAME" property="drugName" />
+		<result column="USER_ID" property="userId" />
+		<result column="UNAME" property="userName" />
+		<result column="APPLY_TIME" property="applyTime" />
+		<result column="APPLY_NUM" property="applyNum" />
+		<result column="CHECK_STATE" property="checkState" />
+	</resultMap>
+	<!-- 查询药品申请表总数 -->
+	<select id="countDrugApply" resultType="java.lang.Integer">
+		SELECT COUNT(DA.APPLY_ID) C FROM DRUG_APPLY DA
+		<where>
+			<if test=" dateStart != null and dateStart != ''">
+				AND DA.APPLY_TIME &gt;= to_date(#{dateStart},'YYYY-MM-DD HH24:mi:ss')
+			</if>
+			<if test=" dateEnd != null and dateEnd != ''">
+				AND DA.APPLY_TIME &lt;= to_date(#{dateEnd},'YYYY-MM-DD HH24:mi:ss')
+			</if>
+			<if test="checkState != null and checkState != -1">
+				AND DA.CHECK_STATE = #{checkState}
+			</if>
+			<if test="userId != null">
+				AND DA.USER_ID = #{userId}
+			</if>
+			<if test="drugName != null and drugName != ''">
+				AND DA.DRUG_NAME LIKE CONCAT(CONCAT('%',#{drugName}),'%')
+			</if>
+		</where>
+	</select>
+	<!-- 修改请领单 -->
+	<update id="updateApply">
+		UPDATE DRUG_APPLY
+		SET APPLY_NUM = #{altNum}
+		WHERE APPLY_ID = #{id} AND CHECK_STATE = 0
+	</update>
+	<!-- 查询是否有药品 -->
+	<select id="getDrug" resultType="java.lang.Integer">
+		SELECT DRUGID FROM T_DRUG WHERE DRUG_NAME = #{drugName}
+	</select>
+	<!-- 新增请领单 -->
+	<insert id="insertDrugApply">
+		INSERT INTO DRUG_APPLY
+		(APPLY_ID, DRUG_NAME, USER_ID, APPLY_TIME, APPLY_NUM, CHECK_STATE)
+		VALUES
+		(SEQ_DRUG_APPLY.NEXTVAL, #{drugName}, #{userId}, SYSDATE, #{drugNum}, 0)
+	</insert>
+	<!-- 查询药品表 -->
+	<select id="listDrugInfDto" resultMap="getDrugInfDtoRM">
+		SELECT DR.*,DT.DTNAME FROM T_DRUG DR
+		INNER JOIN T_DRUGTYPE DT ON DR.DTID = DT.DTID
+		<where>
+			<if test="drugName != null and drugName != ''">
+				AND DR.DRUG_NAME LIKE CONCAT(CONCAT('%',#{drugName}),'%')
+			</if>
+		</where>
+	</select>
+	<resultMap type="pharmacy.web.store.model.dto.DrugInfDto" id="getDrugInfDtoRM">
+		<result column="DRUGID" property="drugId" />
+		<result column="DRUG_NAME" property="drugName" />
+		<result column="CHEMICAL_NAME" property="chemicalName" />
+		<result column="COMMONLY_NAME" property="commonlyName" />
+		<result column="SPECIFICATION" property="specification" />
+		<result column="DOSAGE" property="dosage" />
+		<result column="FORMULA" property="formula" />
+		<result column="METHOD_USERS" property="methodUsers" />
+		<result column="MARKUP" property="markup" />
+		<result column="SPELL" property="spell" />
+		<result column="FIVE_STROKE" property="fiveStroke" />
+		<result column="INVOICE_NAME" property="invoiceName" />
+		<result column="ANTIBIOTICS" property="antibiotics" />
+		<result column="DOSE" property="dose" />
+		<result column="NUMBER_DAYS" property="numberDays" />
+		<result column="DTID" property="dcost" />
+		<result column="DTNAME" property="drugTypeName" />
+		<result column="DSTATE" property="dcost" />
+		<result column="DCOST" property="dcost" />
+		<result column="DSALE" property="dsale" />
+	</resultMap>
+	<!-- 查询药品表总数 -->
+	<select id="countDrugInfDto" resultType="java.lang.Integer">
+		SELECT COUNT(DR.DRUGID) C FROM T_DRUG DR
+		<where>
+			<if test="drugName != null and drugName != ''">
+				AND DR.DRUG_NAME LIKE CONCAT(CONCAT('%',#{drugName}),'%')
+			</if>
+		</where>
+	</select>
+	<!-- 调整药品零售价 -->
+	<update id="updateDrugPrice">
+		UPDATE T_DRUG
+		SET DSALE = #{price}
+		WHERE DRUGID = #{drugId}
+	</update>
+	<!-- 调整药品零售价记录 -->
+	<insert id="insertDrugPriceLog">
+		INSERT INTO T_DRUG_PRICE
+		(PRICE_ID, DRUGID, BEFORE_PRICE, LATER_PRICE, PURCHASING_TIME, U_ID)
+		VALUES
+		(SEQ_T_DRUG_PRICE.NEXTVAL, #{drugId}, #{beforePrice}, #{price}, SYSDATE, #{userId})
+	</insert>
+</mapper>

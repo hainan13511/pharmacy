@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="pharmacy.web.store.dao.DrugBreakageMapper">
+	<!-- 查询药品报损表的信息 -->
+	<select id="breakageList" resultMap="DrugBreakageDtoResultMap">
+		SELECT DRUG_BREAKAGE.*,T_USER.UNAME FROM DRUG_BREAKAGE
+		JOIN T_USER
+		ON T_USER.U_ID=DRUG_BREAKAGE.U_ID
+		<where>
+			<if test="startTime!=null and startTime!=''">
+				AND TO_CHAR(BREAKAGE_DATE,'YYYY-MM-DD HH:mm:ss') &gt;=#{startTime}
+			</if>
+			<if test="endTime!=null and endTime!=''">
+				AND TO_CHAR(BREAKAGE_DATE,'YYYY-MM-DD HH:mm:ss') &lt;=#{endTime}
+			</if>
+			<if test="operate!=null and operate!=''">
+				AND UNAME like CONCAT(CONCAT('%',#{operate}),'%')
+			</if>
+		</where>
+		ORDER BY BREAKAGE_DATE ASC
+	</select>
+	<!-- 查询药品调价前后价格 -->
+	<select id="breakageCount" resultType="int">
+		SELECT COUNT(*) FROM DRUG_BREAKAGE
+		JOIN T_USER
+		ON T_USER.U_ID=DRUG_BREAKAGE.U_ID
+		<where>
+			<if test="startTime!=null and startTime!=''">
+				AND TO_CHAR(BREAKAGE_DATE,'YYYY-MM-DD HH:mm:ss') &gt;=#{startTime}
+			</if>
+			<if test="endTime!=null and endTime!=''">
+				AND TO_CHAR(BREAKAGE_DATE,'YYYY-MM-DD HH:mm:ss') &lt;=#{endTime}
+			</if>
+			<if test="operate!=null and operate!=''">
+				AND UNAME like CONCAT(CONCAT('%',#{operate}),'%')
+			</if>
+		</where>
+		ORDER BY BREAKAGE_DATE ASC
+	</select>
+
+	<!-- 映射 -->
+	<resultMap type="pharmacy.web.store.model.dto.DrugBreakageDto" id="DrugBreakageDtoResultMap">
+		<result column="BREAKAGE_ID" property="breakageId" />
+		<result column="BREAKAGE_CONTENT" property="breakageContent" />
+		<result column="U_ID" property="uId" />
+		<result column="BREAKAGE_DATE" property="breakageDate" />
+		<result column="BREAKAGE_COUNT" property="breakageCount" />
+		<result column="UNAME" property="uname" />
+	</resultMap>
+
+</mapper>

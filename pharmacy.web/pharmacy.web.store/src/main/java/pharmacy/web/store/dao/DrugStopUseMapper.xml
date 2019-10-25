@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="pharmacy.web.store.dao.DrugStopUseMapper">
+	<!-- 查询药品停用的信息 -->
+	<select id="drugStopUse" resultMap="DrugStopUseDtoResultMap">
+		SELECT T1.DRUGID,T1.DRUG_NAME,T1.DSTATE,T2.INVENTORY_COUNT,T3.HOUSE_COUNT
+		FROM T_DRUG T1
+		LEFT JOIN
+		(SELECT
+		DRUGID,SUM(INVENTORY_COUNT) INVENTORY_COUNT FROM T_PHARMACY_INVENTORY GROUP BY DRUGID) T2
+		ON T2.DRUGID=T1.DRUGID
+		LEFT
+		JOIN
+		(SELECT DRUGID,SUM(HOUSE_COUNT) HOUSE_COUNT FROM T_HOUSE_INVENTORY GROUP BY DRUGID) T3
+		ON T3.DRUGID=T1.DRUGID
+		<where>
+			<!-- <if test="startTime!=null and startTime!=''"> AND TO_CHAR(BREAKAGE_DATE,'YYYY-MM-DD HH:mm:ss') &gt;=#{startTime} 
+				</if> <if test="endTime!=null and endTime!=''"> AND TO_CHAR(BREAKAGE_DATE,'YYYY-MM-DD HH:mm:ss') &lt;=#{endTime} </if> -->
+			<if test="drugName!=null and drugName!=''">
+				AND DRUG_NAME like CONCAT(CONCAT('%',#{drugName}),'%')
+			</if>
+			<if test="stateName!=null and stateName!=''">
+				AND DSTATE=#{stateName}
+			</if>
+		</where>
+		ORDER BY DRUGID
+	</select>
+
+	<!-- 查询总数据 -->
+	<select id="count" resultType="int">
+	SELECT COUNT(*) FROM(
+		SELECT T1.DRUGID,T1.DRUG_NAME,T1.DSTATE,T2.INVENTORY_COUNT,T3.HOUSE_COUNT
+		FROM T_DRUG T1
+		LEFT JOIN
+		(SELECT DRUGID,SUM(INVENTORY_COUNT) INVENTORY_COUNT FROM T_PHARMACY_INVENTORY GROUP BY DRUGID) T2
+		ON T2.DRUGID=T1.DRUGID
+		LEFT JOIN
+		(SELECT DRUGID,SUM(HOUSE_COUNT) HOUSE_COUNT FROM T_HOUSE_INVENTORY GROUP BY DRUGID) T3
+		ON T3.DRUGID=T1.DRUGID
+		<where>
+			<!-- <if test="startTime!=null and startTime!=''"> AND TO_CHAR(BREAKAGE_DATE,'YYYY-MM-DD HH:mm:ss') &gt;=#{startTime} 
+				</if> <if test="endTime!=null and endTime!=''"> AND TO_CHAR(BREAKAGE_DATE,'YYYY-MM-DD HH:mm:ss') &lt;=#{endTime} </if> -->
+			<if test="drugName!=null and drugName!=''">
+				AND DRUG_NAME like CONCAT(CONCAT('%',#{drugName}),'%')
+			</if>
+			<if test="stateName!=null and stateName!=''">
+				AND DSTATE=#{stateName}
+			</if>
+		</where>
+		) 
+	</select>
+
+
+	<!-- 修改药品的状态 -->
+	<update id="UpdateDrugState">
+		UPDATE T_DRUG SET DSTATE=#{state} WHERE T_DRUG.DRUGID=#{drugid}
+	</update>
+	<!-- 映射 -->
+	<resultMap type="pharmacy.web.store.model.dto.DrugStopUseDto" id="DrugStopUseDtoResultMap">
+		<result column="DRUGID" property="drugId" />
+		<result column="DRUG_NAME" property="drugName" />
+		<result column="CHEMICAL_NAME" property="chemicalName" />
+		<result column="COMMONLY_NAME" property="commonlyName" />
+		<result column="SPECIFICATION" property="specification" />
+		<result column="DOSAGE" property="dosage" />
+		<result column="FORMULA" property="formula" />
+		<result column="METHOD_USERS" property="methodUsers" />
+		<result column="MARKUP" property="markup" />
+		<result column="SPELL" property="spell" />
+		<result column="FIVE_STROKE" property="fiveStroke" />
+		<result column="INVOICE_NAME" property="invoiceName" />
+		<result column="ANTIBIOTICS" property="antibiotics" />
+		<result column="DOSE" property="dose" />
+		<result column="NUMBER_DAYS" property="numberDays" />
+		<result column="DCOST" property="dcost" />
+		<result column="DSALE" property="dsale" />
+		<result column="INVENTORY_COUNT" property="inventoryCount" />
+		<result column="HOUSE_COUNT" property="houseCount" />
+		<result column="DSTATE" property="state" />
+	</resultMap>
+
+</mapper>

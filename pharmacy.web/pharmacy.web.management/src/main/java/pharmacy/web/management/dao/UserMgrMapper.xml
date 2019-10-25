@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="pharmacy.web.management.dao.UserMgrMapper">
+
+	<select id="userMgrTable" resultMap="userMgrInf">
+		SELECT A.U_ID,A.UACCOUNT,A.UPWD,A.UNAME,B.SPARAM,A.UTIME FROM T_USER A JOIN T_STATE B ON A.USTATE = B.SVALUE WHERE B.STYPE='用户' AND A.U_ID !=${uid}
+		<if test="stime != null and stime != '' ">
+			AND TO_CHAR(UTIME,'YYYY-MM-DD') &gt;= #{stime}
+		</if>
+		<if test="etime != null and etime != '' ">
+			AND TO_CHAR(UTIME,'YYYY-MM-DD') &lt;= #{etime}
+		</if>
+		<if test="uname != null and uname != '' ">
+			AND UNAME LIKE CONCAT(CONCAT('%',#{uname}),'%')
+		</if>
+	</select>
+	<select id="userMgrTableCount" resultType="int">
+		SELECT COUNT(*) FROM T_USER A JOIN T_STATE B ON A.USTATE = B.SVALUE WHERE B.STYPE='用户' AND A.U_ID !=${uid}
+		<if test="stime != null and stime != '' ">
+			AND TO_CHAR(UTIME,'YYYY-MM-DD') &gt;= #{stime}
+		</if>
+		<if test="etime != null and etime != '' ">
+			AND TO_CHAR(UTIME,'YYYY-MM-DD') &lt;= #{etime}
+		</if>
+		<if test="uname != null and uname != '' ">
+			AND UNAME LIKE CONCAT(CONCAT('%',#{uname}),'%')
+		</if>
+	</select>
+	<update id="prohibit">
+		UPDATE T_USER SET USTATE = 0 WHERE T_USER.U_ID = #{uid}
+	</update>
+	<update id="enable">
+		UPDATE T_USER SET USTATE = 1 WHERE T_USER.U_ID = #{uid}
+	</update>
+	<update id="resetPassword">
+		UPDATE T_USER SET UPWD = #{pwd} WHERE T_USER.U_ID = #{uid}
+	</update>
+	<select id="userAccChecking" resultType="int">
+		SELECT COUNT(*) FROM T_USER WHERE UACCOUNT = #{uacc}
+	</select>
+	<insert id="userMgrAdd">
+		INSERT INTO T_USER(U_ID,UACCOUNT,UPWD,UNAME,USTATE,UTIME) VALUES(SEQ_USERTAB.NEXTVAL,#{uacc},#{upwd},#{uname},1,SYSDATE)
+	</insert>
+	<select id="userMgrRole" resultMap="role">
+		SELECT * FROM T_ROLE
+	</select>
+	<insert id="userMgrAddRole">
+		INSERT INTO T_URRELATION(URID,U_ID,ROLEID)VALUES(SEQ_T_URRELATION.NEXTVAL,#{uid},#{rid})
+	</insert>
+	<select id="userMgrUid" resultType="java.lang.String">
+		SELECT U_ID FROM T_USER WHERE UACCOUNT = #{acc}
+	</select>
+	<select id="userMgrRoleGet" resultType="java.lang.String">
+		SELECT A.ROLEID FROM T_URRELATION A JOIN T_ROLE B ON A.ROLEID = B.ROLEID WHERE U_ID = #{uid}
+	</select>
+	<delete id="userMgrDelRole">
+		DELETE  T_URRELATION WHERE U_ID = #{uid}
+	</delete>
+	<insert id="initLog">
+		INSERT INTO 
+		DRUG_LOG(LOG_ID,LOG_CONTENT,U_ID,LOG_DATE)
+		VALUES(SEQ_DRUG_LOG.NEXTVAL,#{str},#{aid},SYSDATE)
+	</insert>
+	<resultMap type="pharmacy.common.model.Role" id="role">
+		<result column="ROLEID" property="roleid"/>
+		<result column="ROLENAME" property="rolename"/>
+	</resultMap>
+	<resultMap type="pharmacy.common.model.UserInfo" id="userMgrInf">
+		<result column="U_ID" property="uid"/>
+		<result column="UACCOUNT" property="uaccount"/>
+		<result column="UPWD" property="upwd"/>
+		<result column="UNAME" property="uname"/>
+		<result column="SPARAM" property="ustate"/>
+		<result column="UTIME" property="utime"/>
+	</resultMap>
+</mapper>

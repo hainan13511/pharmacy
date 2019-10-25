@@ -1,0 +1,122 @@
+html, body {
+	margin: 0; /* 外边距全部清零 */
+}
+
+.panel-body .panel-add>* {
+	float: left;
+	margin: 0 5px 20px 10px;
+}
+
+.panel-body .panel-search>* {
+	float: left;
+	margin: 1px 10px 20px 10px;
+	width: 320px;
+}
+
+.alter-role {
+	position: absolute;
+	width: 300px;
+	margin: -180px auto 0 400px;
+	z-index: 999;
+	display: none;
+}
+
+.alter-role .panel-body>* {
+	margin: 20px 0;
+}
+
+.limit-list {
+	width: 270px;
+	margin-top: 10px;
+}
+
+.add-role .panel-body>* {
+	margin: 20px 0;
+}
+
+.limit-list1 {
+	width: 270px;
+	margin-top: 10px;
+}
+
+#table-edit{
+	margin-top: 20px;
+}
+  .myPanel {
+                margin: 30px auto;
+                width: 98%;
+            }
+
+            .div_tree {
+                padding: 15px;
+            }
+
+            .div_btn {
+                text-align: center;
+            }
+
+            .div_page {
+                text-align: center;
+            }
+
+            @media (min-width: 1200px) .col-lg-1 {
+                width: 8.33333333%;
+            }
+
+            @media (min-width: 992px) .col-md-2 {
+                width: 16.66666667%;
+            }
+
+            @media (min-width: 768px) .col-sm-6 {
+                width: 50%;
+            }
+
+            @media (min-width: 1200px) .col-lg-8 {
+                width: 66.66666667%;
+            }
+
+            @media (min-width: 992px) .col-md-4 {
+                width: 33.33333333%;
+            }
+
+            @media (min-width: 768px) .col-sm-12 {
+                width: 100%;
+            }
+
+            .col-sm-6>button {
+                width: 100%;
+            }
+
+            .div_seek {
+                padding-bottom: 10px;
+            }
+
+            .div_seek .col-lg-3>input {
+                padding-left: 95px;
+            }
+
+            .div_seek .col-lg-3>label {
+                padding-left: 12px;
+                padding-top: 5px;
+            }
+
+            .div_seek .col-lg-2>select {
+                padding-left: 110px;
+            }
+
+            .div_seek .col-lg-2>label {
+                padding-left: 12px;
+                padding-top: 5px;
+            }
+
+            .col-lg-3>.input-control-label-left {
+                width: 80px;
+            }
+
+            .col-lg-2>.input-control-label-left {
+                width: 95px;
+            }
+
+            .div_seek>.row>div {
+                padding: 5px 3px;
+            }

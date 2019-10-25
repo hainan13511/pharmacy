@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="pharmacy.web.warehouse.dao.IncompatibleMapper">
+
+	<!--禁忌药物展示  -->
+	<select id="incomDrug" resultType="string">
+		SELECT DISTINCT C.DRUG_NAME FROM T_INCOMPATIBLE A INNER JOIN T_DRUG B ON
+		A.DRUGID=B.DRUGID INNER JOIN T_DRUG C ON 
+		A.SDRUGID=C.DRUGID WHERE A.DRUGID=#{drugid} 
+	</select>
+	<!--未配置禁忌药物展示 -->
+	<select id="outIncomDrug" resultMap="dif">
+		SELECT * FROM T_DRUG A WHERE A.DRUG_NAME!=#{dname}
+		AND A.DRUGID NOT IN
+		(SELECT DRUGID FROM T_INCOMPATIBLE WHERE DRUGID=
+		(SELECT DRUGID FROM T_DRUG WHERE DRUG_NAME=#{dname}))
+		AND A.DRUGID NOT IN (SELECT SDRUGID FROM T_INCOMPATIBLE WHERE DRUGID=
+		(SELECT DRUGID FROM T_DRUG WHERE DRUG_NAME=#{dname}))
+	</select>
+	<!--设置禁忌药物  -->
+	<insert id="incomSet">
+		INSERT INTO T_INCOMPATIBLE(ICPID,DRUGID,SDRUGID)VALUES
+		(SEQ_T_INCOMPATIBLE.NEXTVAL,
+		(SELECT DRUGID FROM T_DRUG WHERE DRUG_NAME=#{dname1}),
+		(SELECT DRUGID FROM T_DRUG WHERE DRUG_NAME=#{dname2}))
+	</insert>
+	<!--删除禁忌药物  -->
+	<delete id="delIncomp">
+		DELETE FROM T_INCOMPATIBLE WHERE DRUGID=
+		(SELECT DRUGID FROM T_DRUG WHERE DRUG_NAME=#{delname1}) AND SDRUGID=
+		(SELECT DRUGID FROM T_DRUG WHERE DRUG_NAME=#{delname2})
+	</delete>
+
+		<resultMap type="pharmacy.common.model.DrugInf" id="dif">
+			<result column="drugid" property="drugId"/>
+			<result column="drug_name" property="drugName"/>
+		</resultMap>
+
+</mapper>

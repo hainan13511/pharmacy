@@ -1,0 +1,39 @@
+<!doctype html>
+<html class="x-admin-sm">
+	<head>
+		<meta charset="UTF-8">
+		<title>药库登录</title>
+		<meta name="renderer" content="webkit|ie-comp|ie-stand">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8" />
+		<meta http-equiv="Cache-Control" content="no-siteapp" />
+		<link rel="stylesheet" href="../css/font.css">
+		<link rel="stylesheet" href="../css/login.css">
+		<link rel="stylesheet" href="../css/xadmin.css">
+		<link rel="stylesheet" type="text/css" href="../3rd/zui/css/zui.css"/>
+	</head>
+	<body class="login-bg">
+
+		<div class="login layui-anim layui-anim-up">
+			<div class="message">智慧医院药房-药库登录</div>
+			<div id="darkbannerwrap"></div>
+
+			<form method="post" class="layui-form">
+				<input name="username" placeholder="用户名" type="text" lay-verify="required" class="layui-input">
+				<hr class="hr15">
+				<input name="password" lay-verify="required" placeholder="密码" type="password" class="layui-input"maxlength="8">
+				<hr class="hr15">
+				<input name="code" class="code" placeholder="验证码" autocomplete="off" type="text" style="width: 50%;">
+				<img src="../SecurityCodeImageAction.action" alt="验证码" name="checkImg" id="checkImg" style="position:relative; left:20px; height: 100%;display: inline-block; vertical-align: middle;"
+				 onClick="document.getElementById('checkImg').src='../SecurityCodeImageAction.action?timestamp='+ (new Date().getTime().toString(36)); return false" />
+				<hr class="hr15">
+				<input value="登录" lay-submit lay-filter="login" style="width:100%;" type="button">
+				<hr class="hr20">
+			</form>
+		</div>
+	</body>
+	<script src="../3rd/jq/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../3rd/zui/js/zui.js"></script>
+	<script src="../js/login.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../js/security.js" type="text/javascript" charset="utf-8"></script>
+</html>

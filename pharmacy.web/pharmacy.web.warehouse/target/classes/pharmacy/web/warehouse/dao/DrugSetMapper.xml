@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="pharmacy.web.warehouse.dao.DrugSetMapper">
+	<!-- 药品低限量初始化插入   -->
+	<insert id="miniSet" parameterType="pharmacy.web.warehouse.model.dto.MiniSetDto">
+		<selectKey order="BEFORE" resultType="int" keyProperty="drugId">
+		SELECT SEQ_ADMINTAB.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO T_MINIMUM(MINIMUN_ID,DRUGID,MINIMUN_VAL)VALUES
+		(SEQ_T_MINIMUM.NEXTVAL,#{drugId},#{minimunVal})
+	</insert>
+	<!-- 药品设置插入   -->
+	<insert id="drugSet">
+		INSERT INTO T_DRUG(DRUGID,DRUG_NAME,CHEMICAL_NAME,COMMONLY_NAME,
+		SPECIFICATION,DOSAGE,FORMULA,METHOD_USERS,MARKUP,SPELL,FIVE_STROKE,
+		INVOICE_NAME,ANTIBIOTICS,DOSE,NUMBER_DAYS,DTID,DSTATE,DCOST,DSALE)VALUES
+		(#{drugId},#{drugname},#{chemicalname},#{commonly},#{specification},#{dosage},#{formula},
+		#{method},#{markup},#{spell},#{five},#{invoice},#{anti},#{dose},#{numday},
+		#{dtname},1,#{dcost},#{dsale})
+	</insert>
+	<!-- 药品设置修改   -->
+	<update id="alterDrug">
+		UPDATE T_DRUG SET DRUG_NAME=#{drugname},CHEMICAL_NAME=#{chemicalname},COMMONLY_NAME=#{commonly},
+		SPECIFICATION=#{specification},DOSAGE=#{dosage},FORMULA=#{formula},METHOD_USERS=#{method},
+		MARKUP=#{markup},SPELL=#{spell},FIVE_STROKE=#{five},INVOICE_NAME=#{invoice},
+		ANTIBIOTICS=#{anti},DOSE=#{dose},NUMBER_DAYS=#{numday},DCOST=#{dcost},DSALE=#{dsale},
+		DTID=(SELECT DTID FROM T_DRUGTYPE WHERE DTNAME=#{dtname}) WHERE DRUGID=#{drugid}
+	</update>
+	<!--药品设置展示初始化  -->
+	<select id="drugInfInit" resultMap="dif">
+		SELECT * FROM T_DRUG A INNER JOIN T_DRUGTYPE B ON
+		A.DTID=B.DTID
+			<if test="drugname!=null and drugname!=''">
+				AND A.DRUG_NAME LIKE CONCAT(CONCAT('%',#{drugname}),'%')	
+			</if>
+		ORDER BY A.DRUGID DESC		
+	</select>
+	<!--药品设置列表分页  -->
+	<select id="countDrug" resultType="integer">
+		SELECT COUNT(*) C FROM T_DRUG A INNER JOIN T_DRUGTYPE B ON
+		A.DTID=B.DTID
+			<if test="drugname!=null and drugname!=''">
+				AND A.DRUG_NAME LIKE CONCAT(CONCAT('%',#{drugname}),'%')	
+			</if>					
+	</select>	
+	<!--药品详情展示  -->
+	<select id="drugShow" resultMap="dif">
+		SELECT A.*,B.DTNAME,C.DTNAME FNAME FROM T_DRUG A LEFT JOIN T_DRUGTYPE B ON
+		A.DTID=B.DTID LEFT JOIN T_DRUGTYPE C ON
+		B.FID=C.DTID WHERE A.DRUGID=#{drugid}	
+	</select>
+	<!-- 删除已设置的药品   -->
+	<delete id="delDrug">
+		DELETE FROM T_DRUG WHERE DRUGID=#{drugid}
+	</delete>	
+	<!-- 药品采购插入出入库明细表   -->
+	<insert id="putDrugShop">
+		INSERT INTO T_OUT_PUT_WAREHOUSE(TOR_ID,DRUGID,U_ID,TOR_TIME,OPERATION,AMOUNT)
+		VALUES(SEQ_T_OUT_PUT_WAREHOUSE.NEXTVAL,#{drugid},
+		(SELECT U_ID FROM T_USER WHERE UNAME=#{uname}),SYSDATE,'入库',#{amount})
+	</insert>	
+	<!--判断库存中是否有该药  -->
+	<select id="judgeDrugCount" resultType="string">
+		SELECT * FROM T_PHARMACY_INVENTORY WHERE DRUGID=#{drugid}				
+	</select>	
+	<!-- 增加新药的库存   -->
+	<insert id="addDrugCount" parameterType="pharmacy.web.warehouse.model.dto.DwdDto">
+	<selectKey order="BEFORE" resultType="int" keyProperty="dwdId">
+		SELECT SEQ_T_DRUGS_WAREHOUSE_DETAILED.NEXTVAL FROM DUAL
+	</selectKey>
+		INSERT INTO T_PHARMACY_INVENTORY(INVENTORYID,DRUGID,INVENTORY_COUNT,DWDID)
+		VALUES(SEQ_PHARMACY_INVENTORY.NEXTVAL,#{drugid},#{amount},#{dwdId})
+	</insert>	
+	<!-- 药品采购插入统计表   -->
+	<insert id="drugShop">
+		INSERT INTO T_DRUGS_WAREHOUSE_DETAILED(DWDID,DRUGID,PROVIDER,
+		EFFECTIVE_DATE,PURCHASING_TIME,INVENTORY_COUNT,U_ID,UNIT)VALUES
+		(#{dwdId},#{drugid},#{supply},
+		TO_DATE(#{drugtime},'YYYY-MM-DD'),SYSDATE,#{amount},
+		(SELECT U_ID FROM T_USER WHERE UNAME=#{uname}),#{unit})
+	</insert>
+	<!-- 医保编码配置   -->
+	<update id="insurSet">
+		UPDATE T_DRUG SET INSURVALUE=#{insurance} WHERE DRUGID=#{drugid}
+	</update>
+	<!--药品单位下拉框  -->
+	<select id="unitInf" resultType="string">
+		SELECT SPARAM FROM T_STATE WHERE STYPE='单位'
+	</select>
+	<!--药品设置判断药品名是否已存在  -->
+	<select id="judgeDrugname" resultType="string">
+		SELECT DRUG_NAME FROM T_DRUG WHERE DRUG_NAME=#{drugname}
+	</select>	
+	
+		
+	<resultMap type="pharmacy.web.warehouse.model.dto.DrugInfDto" id="dif">
+		<result column="dtname" property="dtname"/>
+		<result column="fname" property="fname"/>
+		<result column="drug_name" property="drugName"/>
+		<result column="CHEMICAL_NAME" property="chemicalName"/>
+		<result column="COMMONLY_NAME" property="commonlyName"/>
+		<result column="FIVE_STROKE" property="fiveStroke"/>
+		<result column="INVOICE_NAME" property="invoiceName"/>
+		<result column="METHOD_USERS" property="methodUsers"/>		
+		<result column="NUMBER_DAYS" property="numberDays"/>
+	</resultMap>		
+		
+		
+			
+</mapper>

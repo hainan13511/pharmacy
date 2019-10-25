@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="pharmacy.web.store.dao.UnsalableMapper">
+
+	<select id="drugUnsalableTable" resultMap="unsalable">
+		SELECT * FROM T_HOUSE_INVENTORY A
+	    INNER JOIN T_DRUGS_WAREHOUSE_DETAILED B 
+	    ON A.DWDID = B.DWDID 
+	    INNER JOIN T_DRUG C 
+	    ON B.DRUGID = C.DRUGID 
+	    INNER JOIN T_DRUGS_WAREHOUSE_DETAILED D
+	    ON A.DWDID = D.DWDID
+	    AND A.HOUSE_COUNT > 0  
+     	WHERE ADD_MONTHS(A.HOUSE_DATE,3) &lt; TRUNC(SYSDATE) AND HOUSE_COUNT >0
+			<if test="dname != null and dname != '' ">
+				AND DRUG_NAME LIKE CONCAT(CONCAT('%',#{dname}),'%')
+			</if>
+	</select>
+	<select id="drugUnsalableTableCount" resultType="int">
+		SELECT COUNT(*) FROM T_HOUSE_INVENTORY A
+	    INNER JOIN T_DRUGS_WAREHOUSE_DETAILED B 
+	    ON A.DWDID = B.DWDID 
+	    INNER JOIN T_DRUG C 
+	    ON B.DRUGID = C.DRUGID 
+	    INNER JOIN T_DRUGS_WAREHOUSE_DETAILED D
+	    ON A.DWDID = D.DWDID
+	    AND A.HOUSE_COUNT > 0  
+     	WHERE ADD_MONTHS(A.HOUSE_DATE,3) &lt; TRUNC(SYSDATE) AND HOUSE_COUNT >0
+			<if test="dname != null and dname != '' ">
+				AND DRUG_NAME LIKE CONCAT(CONCAT('%',#{dname}),'%')
+			</if>
+	</select>
+	<select id="drugUnsalable" resultMap="unsalable">
+		SELECT * FROM T_HOUSE_INVENTORY A
+	    INNER JOIN T_DRUGS_WAREHOUSE_DETAILED B 
+	    ON A.DWDID = B.DWDID 
+	    INNER JOIN T_DRUG C 
+	    ON B.DRUGID = C.DRUGID 
+	    INNER JOIN T_DRUGS_WAREHOUSE_DETAILED D
+	    ON A.DWDID = D.DWDID
+	    AND A.HOUSE_COUNT > 0  
+     	WHERE ADD_MONTHS(A.HOUSE_DATE,3) &lt; TRUNC(SYSDATE) AND HOUSE_COUNT >0
+	</select>
+	<resultMap type="pharmacy.web.store.model.dto.Unsalable" id="unsalable">
+		<result column="DRUGID" property="did"/>
+		<result column="DRUG_NAME" property="dname"/>
+		<result column="EFFECTIVE_DATE" property="etime"/>
+		<result column="PURCHASING_TIME" property="ptime"/>
+		<result column="INVENTORY_COUNT" property="number"/>
+	</resultMap>
+</mapper>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="pharmacy.web.store.dao.DrugPriceMapper">
+
+	<!-- 查询药品调价前后价格 -->
+	<select id="list" resultMap="DrugPriceResultMap">
+		SELECT T_DRUG_PRICE.*,T_DRUG.DRUG_NAME,T_USER.UNAME
+		FROM T_DRUG_PRICE
+		JOIN T_DRUG ON T_DRUG.DRUGID=T_DRUG_PRICE.DRUGID
+		JOIN T_USER ON T_USER.U_ID=T_DRUG_PRICE.U_ID
+		<where>
+		<if test="startTime!=null and startTime!=''">
+		AND  TO_CHAR(PURCHASING_TIME,'YYYY-MM-DD HH:mm:ss') &gt;=#{startTime}
+		</if>
+		<if test="endTime!=null and endTime!=''">
+		AND  TO_CHAR(PURCHASING_TIME,'YYYY-MM-DD HH:mm:ss') &lt;=#{endTime}
+		</if>
+		<if test="operate!=null and operate!=''">
+		AND UNAME like CONCAT(CONCAT('%',#{operate}),'%')
+		</if>
+		<if test="drugname!=null and drugname!=''">
+		AND DRUG_NAME like CONCAT(CONCAT('%',#{drugname}),'%')
+		</if>
+		</where>
+		ORDER BY PURCHASING_TIME DESC
+	</select>
+
+	<!-- 查询药品调价前后价格总数据-->
+	<select id="count" resultType="int">
+		SELECT COUNT(*)
+		FROM T_DRUG_PRICE
+		JOIN T_DRUG ON T_DRUG.DRUGID=T_DRUG_PRICE.DRUGID
+		JOIN T_USER ON T_USER.U_ID=T_DRUG_PRICE.U_ID
+		<where>
+		<if test="startTime!=null and startTime!=''">
+		AND  TO_CHAR(PURCHASING_TIME,'YYYY-MM-DD HH:mm:ss') &gt;=#{startTime}
+		</if>
+		<if test="endTime!=null and endTime!=''">
+		AND  TO_CHAR(PURCHASING_TIME,'YYYY-MM-DD HH:mm:ss') &lt;=#{endTime}
+		</if>
+		<if test="operate!=null and operate!=''">
+		AND UNAME like CONCAT(CONCAT('%',#{operate}),'%')
+		</if>
+		<if test="drugname!=null and drugname!=''">
+		AND DRUG_NAME like CONCAT(CONCAT('%',#{drugname}),'%')
+		</if>
+		</where>
+		ORDER BY PURCHASING_TIME ASC
+	</select>
+
+
+	<resultMap type="pharmacy.web.store.model.dto.DrugPriceDto" id="DrugPriceResultMap">
+		<result column="PRICE_ID" property="priceId" />
+		<result column="DRUGID" property="drugId" />
+		<result column="BEFORE_PRICE" property="beforePrice" />
+		<result column="LATER_PRICE" property="laterPrice" />
+		<result column="PURCHASING_TIME" property="purchasingTime" />
+		<result column="U_ID" property="uid" />
+		<result column="DRUG_NAME" property="drugName" />
+		<result column="UNAME" property="uname" />
+	</resultMap>
+</mapper>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="pharmacy.web.management.dao.DrugLogMapper">
+
+	<!-- 查看日志日志信息 -->
+	<select id="loglit" resultMap="DrugLogDtoResultMap">
+		SELECT DRUG_LOG.*,T_USER.UNAME FROM DRUG_LOG
+		JOIN T_USER ON T_USER.U_ID=DRUG_LOG.U_ID
+		<where>
+		<if test="startTime!=null and startTime!=''">
+		AND  TO_CHAR(LOG_DATE,'YYYY-MM-DD HH:mm:ss') &gt;=#{startTime}
+		</if>
+		<if test="endTime!=null and endTime!=''">
+		AND  TO_CHAR(LOG_DATE,'YYYY-MM-DD HH:mm:ss') &lt;=#{endTime}
+		</if>
+		<if test="operate!=null and operate!=''">
+		AND UNAME like CONCAT(CONCAT('%',#{operate}),'%')
+		</if>
+		</where>
+		ORDER BY LOG_DATE DESC
+	</select>
+
+
+	<!-- 查看日志日志信息 -->
+	<select id="logCount" resultType="int">
+		SELECT COUNT(*) FROM DRUG_LOG
+		JOIN T_USER ON T_USER.U_ID=DRUG_LOG.U_ID
+		<where>
+		<if test="startTime!=null and startTime!=''">
+		AND  TO_CHAR(LOG_DATE,'YYYY-MM-DD HH:mm:ss') &lt;=#{startTime}
+		</if>
+		<if test="endTime!=null and endTime!=''">
+		AND  TO_CHAR(LOG_DATE,'YYYY-MM-DD HH:mm:ss') &gt;=#{endTime}
+		</if>
+		<if test="operate!=null and operate!=''">
+		AND UNAME like CONCAT(CONCAT('%',#{operate}),'%')
+		</if>
+		</where>
+		ORDER BY LOG_ID
+	</select>
+
+
+	<!-- 类的映射 -->
+	<resultMap type="pharmacy.web.management.model.dto.DrugLogDto" id="DrugLogDtoResultMap">
+		<result column="LOG_ID" property="logId" />
+		<result column="LOG_CONTENT" property="logContent" />
+		<result column="U_ID" property="uId" />
+		<result column="LOG_DATE" property="logDate" />
+		<result column="UNAME" property="uname" />
+	</resultMap>
+</mapper>

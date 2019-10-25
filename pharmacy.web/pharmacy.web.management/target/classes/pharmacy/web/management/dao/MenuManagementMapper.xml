@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="pharmacy.web.management.dao.MenuManagementMapper">
+
+	<!-- 查询该用户的权限菜单 -->
+	<select id="initMenu" resultMap="MenuDtoResultMap">
+		SELECT A.SID,
+		A.SPARAM,
+		B.MENUID ,
+		B.MENUNAME,
+		B.ICON,
+		B.PID ,
+		C.LIMITID,
+		C.LIMITNAME,
+		C.URL
+		FROM T_STATE A
+		LEFT JOIN T_MENU B
+		ON A.SVALUE = B.PID
+		LEFT JOIN T_LIMIT C
+		ON C.MENUID = B.MENUID
+		WHERE A.STYPE = '菜单' ORDER BY A.SVALUE
+	</select>
+
+	<!-- menuDto类的映射 -->
+	<resultMap type="pharmacy.web.management.model.dto.PortAndMenuAndLimitDto" id="MenuDtoResultMap">
+		<result column="SID" property="pid" />
+		<result column="SPARAM" property="pname" />
+		<collection ofType="pharmacy.web.management.model.dto.MenuDto" property="listDtos">
+			<result column="MENUID" property="menuid" />
+			<result column="MENUNAME" property="menuname" />
+			<result column="ICON" property="icon" />
+			<result column="PID" property="pid" />
+			<collection ofType="pharmacy.common.model.Limit" property="secondMenu">
+				<result column="LIMITID" property="limitid" />
+				<result column="LIMITNAME" property="limitname" />
+				<result column="URL" property="url" />
+			</collection>
+		</collection>
+	</resultMap>
+	
+	
+	<select id="judgeSubmenu" resultMap="limitMap">
+		SELECT * FROM T_LIMIT WHERE MENUID = #{mid}
+	</select>
+	
+	<resultMap type="pharmacy.common.model.Limit" id="limitMap">
+		<result column="LIMITID" property="limitid" />
+		<result column="LIMITNAME" property="limitname" />
+		<result column="URL" property="url" />
+		<result column="MENUID" property="menuid" />
+	</resultMap>
+	
+	<delete id="deleteMenu">
+		DELETE FROM T_MENU WHERE MENUID = #{mid}
+	</delete>
+
+	<!-- 删除权限 -->
+	<delete id="deleteLimit">
+		DELETE FROM T_LIMIT WHERE LIMITID = #{lid}
+	</delete>
+	
+	<!-- 添加菜单 -->
+	<insert id="addMenu">
+		INSERT INTO T_MENU(MENUID,MENUNAME,ICON,PID)
+		VALUES(SEQ_T_MENU.NEXTVAL,#{title},#{icon},#{port})
+	</insert>
+	
+	<!--添加子菜单-->
+	<insert id="addLimit">
+		INSERT INTO 
+		T_LIMIT(LIMITID,LIMITNAME,URL,MENUID,LIMITICO)
+		VALUES(SEQ_T_LIMIT.NEXTVAL,#{title},#{url},#{primaryMenuId},'')
+	</insert>
+	
+	<!-- 修改菜单 -->
+	<update id="modifyMenu">
+		UPDATE T_MENU SET MENUNAME = #{title} , ICON = #{icon} WHERE MENUID = #{id}
+	</update>
+	
+	<!-- 修改权限 -->
+	<update id="modifyLimit">
+		UPDATE T_LIMIT SET LIMITNAME = #{title} ,URL = #{url} WHERE LIMITID = #{lid}
+	</update>
+</mapper>

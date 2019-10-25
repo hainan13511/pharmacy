@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="pharmacy.web.warehouse.dao.MiniSetMapper">
+
+		<!--药品低限设置展示初始化  -->
+		<select id="miniInfInit" resultMap="msd">
+			SELECT DR.DRUGID,DR.DRUG_NAME,PH.P_SUM,TM.MINIMUN_VAL FROM T_DRUG DR
+			LEFT JOIN (SELECT P.DRUGID,SUM(P.INVENTORY_COUNT) P_SUM FROM T_PHARMACY_INVENTORY P GROUP BY P.DRUGID) PH 
+			ON DR.DRUGID = PH.DRUGID INNER JOIN T_MINIMUM TM ON
+			DR.DRUGID=TM.DRUGID
+				<if test="drugname!=null and drugname!=''">
+					AND DR.DRUG_NAME LIKE CONCAT(CONCAT('%',#{drugname}),'%')	
+				</if>		
+		</select>
+		<!--药品低限设置列表分页  -->
+		<select id="countMini" resultType="integer">
+			SELECT COUNT(*) C FROM T_DRUG DR
+			LEFT JOIN (SELECT P.DRUGID,SUM(P.INVENTORY_COUNT) P_SUM FROM T_PHARMACY_INVENTORY P GROUP BY P.DRUGID) PH 
+			ON DR.DRUGID = PH.DRUGID INNER JOIN T_MINIMUM TM ON
+			DR.DRUGID=TM.DRUGID
+				<if test="drugname!=null and drugname!=''">
+					AND DR.DRUG_NAME LIKE CONCAT(CONCAT('%',#{drugname}),'%')	
+				</if>					
+		</select>
+		<!--药品低限设置   -->
+		<update id="miniSet">
+			UPDATE T_MINIMUM SET MINIMUN_VAL=#{minival} WHERE DRUGID=#{drugid}
+		</update>
+		<!--药品低限警报  -->
+		<select id="miniInf" resultMap="msd">
+			SELECT DR.DRUGID,DR.DRUG_NAME,PH.P_SUM,TM.MINIMUN_VAL FROM T_DRUG DR
+			LEFT JOIN (SELECT P.DRUGID,SUM(P.INVENTORY_COUNT) P_SUM FROM T_PHARMACY_INVENTORY P GROUP BY P.DRUGID) PH 
+			ON DR.DRUGID = PH.DRUGID INNER JOIN T_MINIMUM TM ON
+			DR.DRUGID=TM.DRUGID		
+		</select>
+		
+		
+
+		<resultMap type="pharmacy.web.warehouse.model.dto.MiniSetDto" id="msd">
+			<result column="DRUGID" property="drugId"/>
+			<result column="drug_name" property="drugName"/>
+			<result column="P_SUM" property="psum"/>
+			<result column="MINIMUN_VAL" property="minimunVal"/>
+		</resultMap>	
+
+</mapper>

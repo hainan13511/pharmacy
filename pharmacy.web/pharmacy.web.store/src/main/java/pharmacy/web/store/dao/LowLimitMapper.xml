@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="pharmacy.web.store.dao.LowLimitMapper">
+
+	<select id="lowLimitTable" resultMap="lowlist">
+		SELECT A.DRUGID,SUM(A.HOUSE_COUNT)HOUSE_COUNT,B.DRUG_NAME FROM T_HOUSE_INVENTORY A JOIN T_DRUG B ON A.DRUGID = B.DRUGID WHERE HOUSE_COUNT &lt; #{limit}
+			<if test="dname != null and dname != '' ">
+				AND DRUG_NAME LIKE CONCAT(CONCAT('%',#{dname}),'%')
+			</if>
+		GROUP BY A.DRUGID,B.DRUG_NAME
+	</select>
+	<select id="lowLimitTableCount" resultType="int">
+		SELECT COUNT(*) FROM ( SELECT A.DRUGID,SUM(A.HOUSE_COUNT)HOUSE_COUNT FROM T_HOUSE_INVENTORY A JOIN T_DRUG B ON A.DRUGID = B.DRUGID WHERE HOUSE_COUNT &lt; #{limit}
+			<if test="dname != null and dname != '' ">
+				 AND DRUG_NAME LIKE CONCAT(CONCAT('%',#{dname}),'%')
+			</if>
+		GROUP BY A.DRUGID )
+	</select>
+	
+	<select id="lowLimit" resultMap="lowlist">
+		SELECT B.DRUG_NAME FROM T_HOUSE_INVENTORY A JOIN T_DRUG B ON A.DRUGID = B.DRUGID WHERE A.HOUSE_COUNT &lt; #{limit} GROUP BY  B.DRUG_NAME
+	</select>
+	
+	<resultMap type="pharmacy.web.store.model.dto.LowLimit" id="lowlist">
+		<result column="DRUGID" property="did"/>
+		<result column="DRUG_NAME" property="dname"/>
+		<result column="HOUSE_COUNT" property="inventoryCount"/>
+	</resultMap>
+</mapper>

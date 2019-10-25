@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="pharmacy.web.warehouse.dao.DrugShopInfMapper">
+
+		<!--药品采购统计表展示初始化  -->
+		<select id="drugShopInfInit" resultMap="dsif">
+			SELECT B.DRUG_NAME,C.UNAME,TO_CHAR(PURCHASING_TIME,'YYYY-MM-DD-HH24:MI') PURCHASING_TIME,A.PROVIDER
+			,A.INVENTORY_COUNT,B.DCOST
+			FROM T_DRUGS_WAREHOUSE_DETAILED A INNER JOIN T_DRUG B ON
+			A.DRUGID=B.DRUGID INNER JOIN T_USER C ON
+			A.U_ID=C.U_ID
+				<if test="drugname!=null and drugname!=''">
+					AND B.DRUG_NAME LIKE CONCAT(CONCAT('%',#{drugname}),'%')	
+				</if>
+				<if test="supply!=null and supply!=''">
+					AND A.PROVIDER LIKE CONCAT(CONCAT('%',#{supply}),'%')	
+				</if>	
+				<if test="uname!=null and uname!=''">
+					AND C.UNAME LIKE CONCAT(CONCAT('%',#{uname}),'%')	
+				</if>
+			ORDER BY PURCHASING_TIME DESC	
+		</select>
+		<!--药品采购统计表分页  -->
+		<select id="drugShopCount" resultType="integer">
+			SELECT COUNT(*) C FROM T_DRUGS_WAREHOUSE_DETAILED A INNER JOIN T_DRUG B ON
+			A.DRUGID=B.DRUGID INNER JOIN T_USER C ON
+			A.U_ID=C.U_ID
+				<if test="drugname!=null and drugname!=''">
+					AND B.DRUG_NAME LIKE CONCAT(CONCAT('%',#{drugname}),'%')	
+				</if>
+				<if test="supply!=null and supply!=''">
+					AND A.PROVIDER LIKE CONCAT(CONCAT('%',#{supply}),'%')	
+				</if>	
+				<if test="uname!=null and uname!=''">
+					AND C.UNAME LIKE CONCAT(CONCAT('%',#{uname}),'%')	
+				</if>				
+		</select>
+		<!--药品出入库明细表展示初始化  -->
+		<select id="outPutInfInit" resultMap="opif">
+			SELECT B.DRUG_NAME,C.UNAME,A.OPERATION,A.AMOUNT,TO_CHAR(TOR_TIME,'YYYY-MM-DD-HH24:MI') TOR_TIME 
+			FROM T_OUT_PUT_WAREHOUSE A INNER JOIN T_DRUG B ON
+			A.DRUGID=B.DRUGID INNER JOIN T_USER C ON 
+			A.U_ID=C.U_ID
+				<if test="drugname!=null and drugname!=''">
+					AND B.DRUG_NAME LIKE CONCAT(CONCAT('%',#{drugname}),'%')	
+				</if>	
+				<if test="uname!=null and uname!=''">
+					AND C.UNAME LIKE CONCAT(CONCAT('%',#{uname}),'%')	
+				</if>	
+			ORDER BY TOR_TIME DESC
+		</select>
+		<!--药品出入库明细表分页  -->
+		<select id="outPutCount" resultType="integer">
+			SELECT COUNT(*) C FROM T_OUT_PUT_WAREHOUSE A INNER JOIN T_DRUG B ON
+			A.DRUGID=B.DRUGID INNER JOIN T_USER C ON 
+			A.U_ID=C.U_ID
+				<if test="drugname!=null and drugname!=''">
+					AND B.DRUG_NAME LIKE CONCAT(CONCAT('%',#{drugname}),'%')	
+				</if>
+				<if test="uname!=null and uname!=''">
+					AND C.UNAME LIKE CONCAT(CONCAT('%',#{uname}),'%')	
+				</if>				
+		</select>
+		
+
+		<resultMap type="pharmacy.web.warehouse.model.dto.DrugShopInfDto" id="dsif">
+			<result column="DRUG_NAME" property="drugName"/>
+			<result column="UNAME" property="uname"/>
+			<result column="PURCHASING_TIME" property="purchasingTime"/>
+			<result column="INVENTORY_COUNT" property="inventoryCount"/>
+		</resultMap>
+		<resultMap type="pharmacy.web.warehouse.model.dto.OutPutInfDto" id="opif">
+			<result column="DRUG_NAME" property="drugName"/>
+			<result column="UNAME" property="uname"/>
+			<result column="TOR_TIME" property="torTime"/>
+		</resultMap>
+
+
+
+
+</mapper>

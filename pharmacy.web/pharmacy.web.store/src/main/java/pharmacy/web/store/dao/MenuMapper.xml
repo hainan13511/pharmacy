@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="pharmacy.web.store.dao.MenuMapper">
+
+    <!-- 查询该用户的权限菜单 -->
+    <select id="list" resultMap="MenuDtoResultMap">
+       SELECT DISTINCT T1.*,T4.*
+		FROM T_LIMIT T1
+		JOIN T_RLRELATION T2 ON T1.LIMITID=T2.LIMITID
+		JOIN T_ROLE T3 ON T3.ROLEID=T2.ROLEID
+		JOIN T_MENU T4 ON T4.MENUID=T1.MENUID
+		JOIN T_STATE T5 ON T5.SVALUE=T4.PID AND T5.STYPE='菜单' AND T5.SPARAM='药房端'
+		JOIN T_URRELATION T6 ON T6.ROLEID=T3.ROLEID
+		JOIN T_USER T7 ON T7.U_ID=T6.U_ID
+		AND T7.U_ID=#{loginid}
+    </select>
+
+    <!-- menuDto类的映射 -->
+    <resultMap type="pharmacy.web.store.model.dto.MenuDto" id="MenuDtoResultMap">
+        <result column="MENUID" property="menuid" />
+        <result column="MENUNAME" property="menuname" />
+        <result column="ICON" property="icon" />
+        <result column="PID" property="pid" />
+        <collection ofType="pharmacy.common.model.Limit" property="secondMenu">
+            <result column="LIMITID" property="limitid" />
+            <result column="LIMITNAME" property="limitname" />
+            <result column="URL" property="url" />
+            <result column="MENUID" property="menuid" />
+        </collection>
+    </resultMap>
+
+</mapper>

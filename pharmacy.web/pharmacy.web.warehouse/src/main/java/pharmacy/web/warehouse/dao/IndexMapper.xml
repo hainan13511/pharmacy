@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="pharmacy.web.warehouse.dao.IndexMapper">
+
+	<!-- 查询药品的总数据 -->
+	<select id="DrugCount" resultType="int">
+		SELECT COUNT(*)FROM T_DRUG
+	</select>
+	<!-- 查询禁忌的药品的总数据 -->
+	<select id="tabooCount" resultType="int">
+		SELECT COUNT(*) FROM T_INCOMPATIBLE
+	</select>
+	<!-- 查询药品停用的总数据 -->
+	<select id="StopDrug" resultType="int">
+		SELECT COUNT(*) FROM T_DRUG WHERE T_DRUG.DSTATE=0
+	</select>
+	<!-- 查询用户人数 -->
+	<select id="userCount" resultType="int">
+		SELECT COUNT(*) FROM T_USER
+	</select>
+
+	<!-- 查询采购统计数据 -->
+	<select id="list" resultMap="PurchaseDtoResultMap">
+		SELECT T2.U_ID ,UNAME, COUNT(*) COUNT FROM T_DRUGS_WAREHOUSE_DETAILED T1
+		RIGHT JOIN
+		T_USER T2 ON T1.U_ID=T2.U_ID
+		GROUP BY T2.U_ID,UNAME
+	</select>
+	<!-- 查询低限表中的信息 -->
+	<select id="minimun" resultMap="MinimumDtoResultMap">
+		SELECT T_DRUG.DRUG_NAME,T_MINIMUM.MINIMUN_VAL
+		FROM T_MINIMUM JOIN T_DRUG ON
+		T_DRUG.DRUGID=T_MINIMUM.DRUGID
+	</select>
+	<!-- 查询药品的库存 -->
+	<select id="drugInventory" resultMap="StatisticsDrugDtoResultMap">
+		SELECT T2.DRUG_NAME ,SUM(T1.INVENTORY_COUNT) INVENTORY_COUNT FROM T_PHARMACY_INVENTORY T1
+		JOIN T_DRUG T2 ON T1.DRUGID=T2.DRUGID
+		GROUP BY DRUG_NAME
+	</select>
+	<!-- 查询访问量表的信息(最新的一条数据) -->
+	<select id="ViewTable" resultType="int">
+		SELECT TV_COUNT FROM(
+		SELECT * FROM T_VISITOR_VOLUME order by TVID desc ) WHERE
+		ROWNUM=1
+	</select>
+	<!-- 查询近7天的访问量 -->
+	<select id="viewVolume" resultMap="ViewVolumeDtoResultMap">
+		SELECT * FROM(
+		SELECT * FROM T_VISITOR_VOLUME order by TVID desc ) WHERE ROWNUM
+		&lt;=7
+	</select>
+
+	<!-- 添加访问量表信息 -->
+	<insert id="insertMess">
+		INSERT INTO T_VISITOR_VOLUME
+		(TVID, TV_COUNT, TV_TIME)
+		VALUES
+		(SEQ_T_VISITOR_VOLUME.NEXTVAL, #{count},
+		#{localhostTime})
+	</insert>
+	<resultMap type="pharmacy.web.warehouse.model.dto.PurchaseDto" id="PurchaseDtoResultMap">
+		<result column="U_ID" property="uid" />
+		<result column="UNAME" property="name" />
+	</resultMap>
+
+	<resultMap type="pharmacy.web.warehouse.model.dto.ViewVolumeDto" id="ViewVolumeDtoResultMap">
+		<result column="TV_COUNT" property="tvCount" />
+		<result column="TV_TIME" property="tvtime" />
+	</resultMap>
+	<resultMap type="pharmacy.web.warehouse.model.dto.MinimumDto" id="MinimumDtoResultMap">
+		<result column="DRUG_NAME" property="DrugName" />
+		<result column="MINIMUN_VAL" property="MinimumVal" />
+	</resultMap>
+	<resultMap type="pharmacy.web.warehouse.model.dto.StatisticsDrugDto" id="StatisticsDrugDtoResultMap">
+		<result column="DRUG_NAME" property="drugName" />
+		<result column="INVENTORY_COUNT" property="inventoryCount" />
+	</resultMap>
+</mapper>

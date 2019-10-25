@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="pharmacy.web.store.dao.DrugSendMapper">
+
+	<!--根据药品大类ID查询下属分类 -->
+	<select id="listDrugType" resultMap="getDrugTypeRM">
+		SELECT * FROM T_DRUGTYPE WHERE FID = #{fid}
+	</select>
+	<resultMap type="pharmacy.common.model.DrugType" id="getDrugTypeRM">
+		<result column="DTID" property="dtId" />
+		<result column="DTNAME" property="dtName" />
+		<result column="FID" property="fId" />
+	</resultMap>
+	<!--根据药品分类ID查询下属药品 -->
+	<select id="listDrugInf" resultMap="getDrugInfRM">
+		SELECT * FROM T_DRUG WHERE DTID = #{dtId}
+	</select>
+	<resultMap type="pharmacy.common.model.DrugInf" id="getDrugInfRM">
+		<result column="DRUGID" property="drugId" />
+		<result column="DRUG_NAME" property="drugName" />
+		<result column="CHEMICAL_NAME" property="chemicalName" />
+		<result column="COMMONLY_NAME" property="commonlyName" />
+		<result column="SPECIFICATION" property="specification" />
+		<result column="DOSAGE" property="dosage" />
+		<result column="FORMULA" property="formula" />
+		<result column="METHOD_USERS" property="methodUsers" />
+		<result column="MARKUP" property="markup" />
+		<result column="SPELL" property="spell" />
+		<result column="FIVE_STROKE" property="fiveStroke" />
+		<result column="INVOICE_NAME" property="invoiceName" />
+		<result column="ANTIBIOTICS" property="antibiotics" />
+		<result column="DOSE" property="dose" />
+		<result column="NUMBER_DAYS" property="numberDays" />
+		<result column="DTID" property="dcost" />
+		<result column="DSTATE" property="dState" />
+		<result column="DCOST" property="dcost" />
+		<result column="DSALE" property="dsale" />
+	</resultMap>
+	<!-- 药品销售记录 -->
+	<insert id="drugSendLog">
+		INSERT INTO T_DRUG_SALES
+		(SALES_ID, DRUGID, SALES_COUNT, SALES_COST_PRICE, SALES_SELL_PRICE,
+		SALES_DATE, U_ID)
+		VALUES
+		(SEQ_T_DRUG_SALES.NEXTVAL, #{drugId}, #{num},#{cost},#{sale},SYSDATE, #{userId})
+	</insert>
+	<!--查询销售药品剩余库存 -->
+	<select id="getDrugCount" resultType="java.lang.Integer">
+		SELECT SUM(HOUSE_COUNT) FROM T_HOUSE_INVENTORY WHERE DRUGID = #{drugId}
+	</select>
+	<!--修改药品库存 -->
+	<update id="updateDrugCount">
+		UPDATE T_HOUSE_INVENTORY
+		SET HOUSE_COUNT = (SELECT HOUSE_COUNT FROM T_HOUSE_INVENTORY WHERE HOUSEID =
+		#{houseId})-#{num},
+		HOUSE_DATE = SYSDATE
+		WHERE HOUSEID = #{houseId}
+	</update>
+
+	<!--查询销售药品剩余库存分批列表 -->
+	<select id="listHouseInventory" resultMap="getHouseInventoryRM">
+		SELECT * FROM T_HOUSE_INVENTORY WHERE DRUGID = #{drugId}
+	</select>
+	   <resultMap type="pharmacy.common.model.HouseInventory" id="getHouseInventoryRM">
+        <result column="HOUSEID" property="houseId" />
+        <result column="DRUGID" property="drugId" />
+        <result column="HOUSE_COUNT" property="houseCount" />
+        <result column="DWDID" property="dwdId" />
+        <result column="HOUSE_DATE" property="houseDate" />
+    </resultMap>
+    <!--查询配伍禁忌 -->
+    <select id="drugTabooCheck" resultType="java.lang.Integer">
+    SELECT T.ICPID FROM T_INCOMPATIBLE T WHERE T.DRUGID = #{drugId} AND T.SDRUGID = #{sDrugId}
+    </select>
+</mapper>
